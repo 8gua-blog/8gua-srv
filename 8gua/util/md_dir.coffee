@@ -1,3 +1,4 @@
+{padStart, trimStart} = require 'lodash'
 toml = require 'toml'
 Git = require '8gua/util/git'
 fs = require 'fs-extra'
@@ -8,7 +9,9 @@ DIR_MD= "-/md"
 
 summary_li = (file)->
     if await fs.pathExists(file)
-        return (await fs.readFile(file, 'utf-8')).split("\n")
+        txt = await fs.readFile(file, 'utf-8')
+        if txt
+            return txt.split("\n")
     return []
 
 module.exports = {
@@ -36,12 +39,16 @@ module.exports = {
 
             index = path.join(hostpath, DIR_MD, SUMMARY)
             link = "* [#{name}](#{dir})"
+            count = 0
             if await fs.pathExists(index)
                 li = (await fs.readFile(index, 'utf-8')).split("\n")
                 for line,pos in li
-                    i = line.ltrim()
+                    i = trimStart(line)
                     if i.charAt(0) == '*' and i.indexOf("](#{dir})") >= 0
-                        li[pos] = link
+                        li[pos] = padStart(link, line.length-i.length, ' ')
+                        count += 1
+                if not count
+                    li.push(link)
                 txt = li.join("\n")
             else
                 txt = link

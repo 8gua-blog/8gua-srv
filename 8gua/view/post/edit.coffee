@@ -3,7 +3,7 @@ glob = require "glob-promise"
 path = require 'path'
 {isEmpty} = require("lodash")
 
-glob_mtime_size = require('8gua/util/glob_mtime_size')
+glob_md = require('8gua/util/glob_md')
 
 module.exports = {
     get : (req, reply)=>
@@ -12,7 +12,7 @@ module.exports = {
         file = req.params['*']
         if not file or file == '/'
             draft = "!/draft"
-            li = await glob_mtime_size(path.join(prefix, draft,"*.md"))
+            li = await glob_md(path.join(prefix, draft))
             if file
                 begin = li.length
                 while 1

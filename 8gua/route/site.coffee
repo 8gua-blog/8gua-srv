@@ -3,9 +3,9 @@ module.exports = {
         "font/:key font"
         "post/sort/dir"
         "post/sort/li"
-        "post/rm/* post/rm"
     ]
     map:[
+        "post/rm/* post/rm"
         "post/dir"
         "post/edit/* post/edit"
         "post"

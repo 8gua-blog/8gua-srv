@@ -6,7 +6,7 @@ fs = require 'fs-extra'
 path = require 'path'
 {isEmpty} = require("lodash")
 firstline = require 'firstline'
-glob_mtime_size = require('8gua/util/glob_mtime_size')
+glob_md = require('8gua/util/glob_md')
 TurndownService = require('turndown')
 turndownService = new TurndownService({
     hr:'---'
@@ -93,7 +93,7 @@ module.exports = {
 
         dir_li = DIR_LI.concat dir_li
         for i in dir_li
-            li.push glob_mtime_size(prefix + "#{i}/*.md")
+            li.push glob_md(path.join(prefix , i))
 
         file_li = await Promise.all(li)
 
