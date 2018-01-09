@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key>
+<string>8gua.startup.plist</string>
+<key>EnvironmentVariables</key>
+<dict>
+<key>PATH</key>
+<string>/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin</string>
+</dict>
+<key>Program</key>
+<string>#CMD</string>
+
+<key>RunAtLoad</key>
+<true/>
+
+<key>KeepAlive</key>
+<true/>
+
+<key>StandardErrorPath</key>
+<string>/tmp/8gua-cli.err</string>
+
+<key>StandardOutPath</key>
+<string>/tmp/8gua-cli.out</string>
+
+</dict>
+</plist>
