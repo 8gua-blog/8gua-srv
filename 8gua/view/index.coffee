@@ -2,26 +2,24 @@ git = require '8gua/util/git'
 tmp = require('tmp')
 path = require 'path'
 fs = require('fs-extra')
-pump = require('pump')
 crypto = require('crypto')
 base64url = require('base64-url')
+# pump = require('./pump.js')
 
 module.exports = {
     post:(req, reply)=>
         {hostpath} = req
         mp = req.multipart(
             (field, file, filename, encoding, mimetype) ->
-
-
-                tmpfile = tmp.tmpNameSync()
-
                 sha = crypto.createHash('SHA224')
                 sha.setEncoding('base64')
                 file.pipe(sha)
 
-                pump(
-                    file
-                    fs.createWriteStream(tmpfile)
+                tmpfile = tmp.tmpNameSync()
+                stream = fs.createWriteStream(tmpfile)
+                file.pipe(stream)
+                file.on(
+                    'end'
                     ->
                         sha.end()
                         hash = base64url.escape(sha.read())
@@ -32,22 +30,24 @@ module.exports = {
                         dir_relative = path.join("-/S", extname)
                         dir = path.join(hostpath,dir_relative)
                         fs.mkdirpSync(dir)
-                        file = path.join(dir_relative, hash+"."+extname)
-                        fs.moveSync(
-                            tmpfile
-                            path.join(hostpath,file)
-                             { overwrite: true }
+                        filepath = path.join(dir_relative, hash+"."+extname)
+                        reply.send filepath
+
+                        stream.close(=>
+                            fs.moveSync(
+                                tmpfile
+                                path.join(hostpath,filepath)
+                                 { overwrite: true }
+                            )
+                            git(hostpath).sync(filepath)
                         )
-                        git(hostpath).run 'add ./'+file
-                        reply.send({
-                            file
-                        })
+
+                        return
                 )
+                return
             (err) ->
         )
-
         return
-
 
     get: (req, reply)=>
         reply.send 0

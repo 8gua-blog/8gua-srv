@@ -6,7 +6,7 @@ dns = require '8gua/lib/dns.coffee'
 
 module.exports =  (restart)->
     reinit = ->
-        require("./8gua.init.coffee")(restart)
+        require("./init.coffee")(restart)
 
     cron 1441 , ->
         CONFIG = toml_config.read(
