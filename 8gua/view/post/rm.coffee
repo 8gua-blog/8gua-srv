@@ -1,4 +1,5 @@
 md_dir = require("8gua/util/md_dir")
+Git = require '8gua/util/git'
 glob_md = require('8gua/util/glob_md')
 fs = require 'fs-extra'
 path = require 'path'
@@ -56,6 +57,8 @@ module.exports =  {
                 if await fs.pathExists(tmppath)
                     await fs.move(tmppath, tofile+TMP,  { overwrite: true })
             if rm
-                await md_dir.rm(prefix, file)
+                git = Git(hostpath)
+                await md_dir.rm(prefix, file, git)
+                git.sync()
         reply.send {}
 }

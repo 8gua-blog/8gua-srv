@@ -1,4 +1,4 @@
-{padStart, trimStart} = require 'lodash'
+{padStart, trimStart, trimEnd} = require 'lodash'
 toml = require 'toml'
 Git = require '8gua/util/git'
 fs = require 'fs-extra'
@@ -42,14 +42,24 @@ module.exports = {
             count = 0
             if await fs.pathExists(index)
                 li = (await fs.readFile(index, 'utf-8')).split("\n")
+                r = []
                 for line,pos in li
+                    line = trimEnd(line)
                     i = trimStart(line)
                     if i.charAt(0) == '*' and i.indexOf("](#{dir})") >= 0
-                        li[pos] = padStart(link, line.length-i.length, ' ')
+                        r.push padStart(link, line.length-i.length, ' ')
                         count += 1
+                    else
+                        if i or (r.length and r[r.length-1])
+                            r.push line
                 if not count
-                    li.push(link)
-                txt = li.join("\n")
+                    if r.length
+                        last =r.length-1
+                        if r[last].trim()
+                            r.push link
+                        else
+                            r[last] = link
+                txt = r.join("\n")
             else
                 txt = link
             await fs.writeFile(index, txt)
@@ -77,11 +87,13 @@ module.exports = {
         txt = await fs.readFile(summary, "utf-8")
         r = []
         for line in txt.split("\n")
-            i = line.trim()
+            line = trimEnd(line)
+            i = trimStart(line)
             if i.charAt(0) == "*" and i.indexOf("""](#{file})""") > 0
                 continue
             else
-                r.push line
+                if i or (r.length and r[r.length-1])
+                    r.push line
         r = r.join("\n")
         if r != txt
             await fs.writeFile(summary, r)
