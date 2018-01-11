@@ -1,3 +1,4 @@
+md_dir = require("8gua/util/md_dir")
 glob_md = require('8gua/util/glob_md')
 fs = require 'fs-extra'
 path = require 'path'
@@ -41,9 +42,12 @@ module.exports =  {
             console.log file
         else
             stat = await fs.lstat(filepath)
+            rm = 1
             if stat.isDirectory()
                 if not (await glob_md(filepath)).length
                     await fs.remove(filepath)
+                else
+                    rm = 0
             else
                 tofile = name_unique(path.join(prefix, "!/trash", file))
                 await fs.mkdirp(path.dirname(tofile))
@@ -51,5 +55,7 @@ module.exports =  {
                 await fs.move(filepath, tofile,  { overwrite: true })
                 if await fs.pathExists(tmppath)
                     await fs.move(tmppath, tofile+TMP,  { overwrite: true })
+            if rm
+                await md_dir.rm(prefix, file)
         reply.send {}
 }

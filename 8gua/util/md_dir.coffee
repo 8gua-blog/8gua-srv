@@ -72,6 +72,22 @@ module.exports = {
             git.sync(dir_md)
             git.sync(index)
     }
+    rm : (root, file)->
+        summary = path.join(root, SUMMARY)
+        txt = await fs.readFile(summary, "utf-8")
+        r = []
+        for line in txt.split("\n")
+            i = line.trim()
+            if i.charAt(0) == "*" and i.indexOf("""](#{file})""") > 0
+                continue
+            else
+                r.push line
+        r = r.join("\n")
+        if r != txt
+            await fs.writeFile(summary, r)
+        return
+
+
     li : (root)->
         dir_li = []
         for dir in (await fs.readdir(root))

@@ -20,6 +20,7 @@
         "request": "^2.83.0",
         "request-promise-native": "^1.0.5",
         "require-reload": "^0.2.2",
+        "send": "^0.16.1",
         "simple-git": "^1.85.0",
         "tmp": "^0.0.33",
         "toml": "^2.3.3",
@@ -45,5 +46,5 @@
         "url": "https://github.com/8gua/8gua-cli-release.git"
     },
     "scripts": {},
-    "version": "0.0.21"
+    "version": "0.0.22"
 }

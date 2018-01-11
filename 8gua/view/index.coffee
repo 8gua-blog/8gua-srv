@@ -30,8 +30,8 @@ module.exports = {
                         dir_relative = path.join("-/S", extname)
                         dir = path.join(hostpath,dir_relative)
                         fs.mkdirpSync(dir)
-                        filepath = path.join(dir_relative, hash+"."+extname)
-                        reply.send filepath
+                        hashname = hash+"."+extname
+                        filepath = path.join(dir_relative, hashname)
 
                         stream.close(=>
                             fs.moveSync(
@@ -40,6 +40,7 @@ module.exports = {
                                  { overwrite: true }
                             )
                             git(hostpath).sync(filepath)
+                            reply.send path.join(extname, hashname)
                         )
 
                         return

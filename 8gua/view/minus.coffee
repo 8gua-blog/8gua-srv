@@ -1,3 +1,4 @@
+send = require('send')
 tomlify = require('tomlify-j0.4')
 fs = require 'fs-extra'
 path = require 'path'
@@ -33,14 +34,15 @@ _handler = (callback)=>
             reply.send err
         return
 
+TEXT = new Set("md toml".split(" "))
 
 module.exports = {
-    get:_handler ({filepath}, reply)=>
+    get:_handler (req, reply)=>
+        {filepath} = req
         if await fs.pathExists(filepath)
-            body = await fs.readFile(filepath, "utf-8")
+            send(req, filepath).pipe(reply.res)
         else
-            body = ''
-        reply.send body
+            reply.send ''
         return 1
 
     post:_handler ({body, hostpath, file}, reply)=>

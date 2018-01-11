@@ -40,6 +40,7 @@ CACHE = {}
 module.exports = {
     post: ({hostpath, body}, reply)->
         {html, h1, file, git} = body
+
         if git
             git = git - 0
         else
@@ -48,10 +49,6 @@ module.exports = {
         tmp = ".tmp"
         if git
             url = file.slice(0, -3)
-            if url.charAt(0) == "!"
-                url = url.slice(1)
-            else
-                url = "-/"+url
         else
             url = ''
             if file.slice(0,8) != "!/draft/"
