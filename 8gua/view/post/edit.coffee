@@ -10,6 +10,7 @@ module.exports = {
         {hostpath} = req
         prefix = path.join(hostpath, '-/md')
         file = req.params['*']
+        # file 为空是首页点击，file 为 / 为侧栏新建，逻辑不太一样
         if not file or file == '/'
             draft = "!/draft"
             li = await glob_md(path.join(prefix, draft))
@@ -42,7 +43,14 @@ module.exports = {
         }
         tmppath = filepath+".tmp"
         if await fs.pathExists(tmppath)
-            r.tmp = await fs.readFile(tmppath, 'utf-8')
+            tmp = await fs.readFile(tmppath, 'utf-8')
+            if tmp == md or not tmp
+                await fs.remove(tmppath)
+            else
+                if md
+                    r.tmp = tmp
+                else
+                    r.md = tmp
         reply.send r
 
 }

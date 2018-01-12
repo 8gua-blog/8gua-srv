@@ -3,6 +3,7 @@ fs = require 'fs-extra'
 
 module.exports = {
     move_autoname:(root, dir, file)->
+        filepath = path.join(root, file)
         ext = path.extname(file)
         basename = path.basename(file, ext)
         today = (new Date()).toISOString().slice(0,10)
@@ -23,10 +24,14 @@ module.exports = {
                 count += 1
             else
                 break
-        await fs.move(
-            path.join(root, file)
-            path.join(root, f)
-            {overwrite: true}
-        )
+        dirpath = path.join(root, dir)
+        if not await fs.pathExists(dirpath)
+             await fs.mkdirp(dirpath)
+        if await fs.pathExists(filepath)
+            await fs.move(
+                filepath
+                path.join(root, f)
+                {overwrite: true}
+            )
         return f
 }

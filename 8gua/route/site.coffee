@@ -5,9 +5,9 @@ module.exports = {
         "post/sort/li"
     ]
     map:[
+        "post/edit/* post/edit"
         "post/rm/* post/rm"
         "post/dir"
-        "post/edit/* post/edit"
         "post"
         "-/* minus"
         '/ index'
