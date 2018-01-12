@@ -89,11 +89,11 @@ module.exports = {
         for line in txt.split("\n")
             line = trimEnd(line)
             i = trimStart(line)
-            if i.charAt(0) == "*" and i.indexOf("""](#{file})""") > 0
-                continue
-            else
-                if i or (r.length and r[r.length-1])
-                    r.push line
+            if i.charAt(0) == "*"
+                if i.indexOf("""](#{file})""") > 0
+                    continue
+            if i or (r.length and r[r.length-1])
+                r.push line
         r = r.join("\n")
         if r != txt
             await fs.writeFile(summary, r)

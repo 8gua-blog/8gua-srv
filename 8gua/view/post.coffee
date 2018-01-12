@@ -1,5 +1,6 @@
 md_dir = require("8gua/util/md_dir")
 toml = require 'toml'
+{move_autoname} = require('8gua/util/fs')
 save = require('8gua/util/save')
 {trim} = require "lodash"
 fs = require 'fs-extra'
@@ -29,7 +30,7 @@ to_markdown = (html)->
     html = html.replace("<br>\n","\n<br>")
     turndownService.turndown(html)
 
-
+DIR_MD = "-/md/"
 DIR_LI = "draft".split ' '
 do ->
     for i,pos in DIR_LI
@@ -39,12 +40,25 @@ CACHE = {}
 
 module.exports = {
     post: ({hostpath, body}, reply)->
-        {html, h1, file, git} = body
+        {html, h1, file, git, dir} = body
+        #         if file.charAt(0) == "!"
+        #             file = file.slice(2)
+        #         console.log file, path.join(
+        #             dir
+        #             file.slice(file.indexOf('/')+1)
+        #         )
 
-        if git
+        if git != undefined
             git = git - 0
         else
             git = true
+
+        if dir
+            if dir+"/" != file.slice(0, dir.length+1)
+                git = true
+                file = await move_autoname(
+                    path.join(hostpath, DIR_MD), dir, file
+                )
 
         tmp = ".tmp"
         if git
@@ -53,7 +67,7 @@ module.exports = {
             url = ''
             if file.slice(0,8) != "!/draft/"
                 file = file+tmp
-        filepath = "-/md/"+file
+        filepath = DIR_MD+file
         md = to_markdown(html).trim()
         h1 = h1.trim()
         if h1 or md
@@ -78,7 +92,7 @@ module.exports = {
 
         li = []
 
-        prefix = path.join(hostpath,"-/md/")
+        prefix = path.join(hostpath, DIR_MD)
 
 
         dir_li = []
