@@ -1,6 +1,7 @@
 {padStart, trimStart, trimEnd} = require 'lodash'
 toml = require 'toml'
 Git = require '8gua/util/git'
+toml_config = require "8gua/lib/toml_config"
 fs = require 'fs-extra'
 path = require 'path'
 
@@ -114,6 +115,7 @@ module.exports = {
                     break
             if not title
                 title = dir
+
             dir_li.push([dir, title])
         return dir_li
 # 1. 读取 根目录 SUMMARY.md

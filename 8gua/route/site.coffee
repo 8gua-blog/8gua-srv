@@ -1,4 +1,7 @@
 module.exports = {
+    get:[
+        "post/dir/sort/* post/dir/sort"
+    ]
     post: [
         "font/:key font"
         "post/sort/dir"

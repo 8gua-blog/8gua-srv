@@ -1,4 +1,5 @@
 path = require 'path'
+toml_config = require "8gua/lib/toml_config"
 git = require '8gua/util/git'
 fs = require 'fs-extra'
 md_dir = require("8gua/util/md_dir")
@@ -7,14 +8,15 @@ DIR_MD = "-/md"
 module.exports =  {
     get:({hostpath}, reply)=>
         r = []
-        for [dir,name] in (await md_dir.li(path.join(hostpath, DIR_MD)))
-            r.push("#{dir}\r#{name}")
+        for li in (await md_dir.li(path.join(hostpath, DIR_MD)))
+            r.push(li.join("\r"))
         reply.send(
             r.join("\n")
         )
 
+
     post:({body, hostpath}, reply)=>
-        {name, dir, old} = body
+        {name, dir, old, sort} = body
         name = name.trim()
         dir = dir.trim()
         err = {}
@@ -41,6 +43,8 @@ module.exports =  {
         else if not await fs.pathExists(dirpath)
             await fs.mkdirp(dirpath)
 
+        init_toml = toml_config(path.join(dirpath,"init.toml"))
+        init_toml.set("SORT", sort-0)
         md_dir.name.set(
             hostpath
             dir
