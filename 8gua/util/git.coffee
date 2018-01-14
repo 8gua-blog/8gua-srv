@@ -31,7 +31,10 @@ init_git = (path)->
                 i = './'+i
             file_li.push i
         _todo = []
-        await git.run "add "+file_li.join(' ')
+        try
+            await git.run "add "+file_li.join(' ')
+        catch err
+            console.trace(err)
         await git.run 'add -u'
         await git.commit('.')
 

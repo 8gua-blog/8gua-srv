@@ -18,16 +18,14 @@ module.exports =  {
     post:({body, hostpath}, reply)=>
         {name, dir, old, sort} = body
         name = name.trim()
-        dir = dir.trim()
+        dir = dir.trim().toLowerCase()
         err = {}
         if not name
             err.name = "请输入章节名称"
         if not dir
             err.dir = "请输入网址路径"
-        else
-            dir = dir.toLowerCase()
-            if not /^[a-z0-9-]+$/.test(dir)
-                err.dir = "路径只能包含 英文、数字或减号"
+        else if not /^[a-z0-9-]+$/.test(dir)
+            err.dir = "路径只能包含 英文、数字或减号"
         raise err
         prefix = path.join(hostpath, DIR_MD)
         dirpath = path.join(prefix, dir)
@@ -44,8 +42,8 @@ module.exports =  {
             await fs.mkdirp(dirpath)
 
         init_toml = toml_config(path.join(dirpath,"init.toml"))
-        init_toml.set("SORT", sort-0)
-        md_dir.name.set(
+        init_toml.set("sort", sort-0)
+        md_dir.dir.set(
             hostpath
             dir
             name

@@ -58,7 +58,7 @@ module.exports =  {
                     await fs.move(tmppath, tofile+TMP,  { overwrite: true })
             if rm
                 git = Git(hostpath)
-                await md_dir.rm(prefix, file, git)
+                await md_dir.rm(hostpath, file)
                 git.sync()
         reply.send {}
 }

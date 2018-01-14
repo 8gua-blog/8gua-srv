@@ -56,13 +56,18 @@ module.exports = {
         if dir
             if dir+"/" != file.slice(0, dir.length+1)
                 git = true
+                old_file = file
                 file = await move_autoname(
-                    path.join(hostpath, DIR_MD), dir, file
+                    path.join(hostpath, DIR_MD), dir, old_file
                 )
+        else
+            old_file = undefined
+
 
         tmp = ".tmp"
         if git
             url = file.slice(0, -3)
+            await md_dir.add(hostpath, h1, file, old_file)
         else
             url = ''
             if file.slice(0,8) != "!/draft/"
