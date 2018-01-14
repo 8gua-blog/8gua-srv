@@ -262,12 +262,11 @@ module.exports = exports = {
             await summary_import(hostpath, dirname)
         return
 
+    li_md:(root)->
+        txt = await summary_li(path.join(root, SUMMARY))
 
-    li : (root)->
-        summary = path.join(root, SUMMARY)
-        txt = (await fs.readFile(summary, 'utf-8')).split("\n")
         dir_li = []
-        existed = new Set()
+
         for i in txt
             if i.startsWith("* [")
                 pos =  i.indexOf('](')
@@ -276,7 +275,15 @@ module.exports = exports = {
                     en = i.slice(pos+2)
                     en = en.slice(0, en.lastIndexOf(')'))
                     dir_li.push([en, cn])
-                    existed.add en
+
+        return dir_li
+
+    li : (root)->
+        dir_li = await exports.li_md(root)
+
+        existed = new Set()
+        for [en, cn] in dir_li
+            existed.add en
 
         for dir in (await fs.readdir(root))
             if (

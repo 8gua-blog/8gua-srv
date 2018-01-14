@@ -5,6 +5,7 @@ config.py
 __pycache__
 package-lock.json
 nohup.out
+tool
 config/*
 *.pyc
 *.lock

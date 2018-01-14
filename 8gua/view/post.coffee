@@ -99,7 +99,6 @@ module.exports = {
 
         prefix = path.join(hostpath, DIR_MD)
 
-
         dir_li = []
         name_li = []
 
@@ -107,17 +106,15 @@ module.exports = {
             dir_li.push dir
             name_li.push name
 
-        dir_li = DIR_LI.concat dir_li
-        for i in dir_li
+        for i in DIR_LI
             li.push glob_md(path.join(prefix , i))
 
         file_li = await Promise.all(li)
-
-        r = [name_li, dir_li.slice(DIR_LI_LEN)]
+        r = [name_li, dir_li]
         #清除不存在的文件
         cache_host_ = {}
 
-        for dir,pos in dir_li
+        for dir,pos in DIR_LI
             cache_ = {}
             li = []
             offset = prefix.length + dir.length + 1
@@ -137,7 +134,7 @@ module.exports = {
                 title = trim(title.trim(), "#").trim()
                 if not title
                     title = "无题 "+(new Date(mtimeMs)).toISOString().replace("T"," ").slice(0, 19)
-                li.push([mtimeMs, title, path.basename(f)])
+                li.push([mtimeMs, path.basename(f), title])
 
                 cache_[f] = [mtimeMs, size, title]
             li.sort (a,b) ->
@@ -146,6 +143,11 @@ module.exports = {
                 i.shift()
             r.push li
             cache_host_[dir] = cache_
+
+        for i in dir_li
+            r.push(
+                await md_dir.li_md(path.join(hostpath, DIR_MD, i))
+            )
 
         CACHE[hostpath] = cache_host_
 

@@ -31,7 +31,7 @@
         "yargs": "^10.0.3"
     },
     "devDependencies": {
-        "nodemon": "^1.14.1"
+        "nodemon": "^1.14.11"
     },
     "files": [
         "src/",
@@ -46,5 +46,5 @@
         "url": "https://github.com/8gua/8gua-cli-release.git"
     },
     "scripts": {},
-    "version": "0.0.29"
+    "version": "0.0.30"
 }
