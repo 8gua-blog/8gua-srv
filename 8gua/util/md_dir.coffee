@@ -8,12 +8,21 @@ path = require 'path'
 SUMMARY = "SUMMARY.md"
 DIR_MD= "-/md"
 
-summary_li = (file)->
+url_by_link = (line)->
+    en = line.slice(line.indexOf('](')+2)
+    return en.slice(0, en.lastIndexOf(')'))
+
+trim_read = (file)->
     if await fs.pathExists(file)
         txt = await fs.readFile(file, 'utf-8')
         txt = txt.replace(/^[\r\n\s\uFEFF\xA0]+|[\r\n\s\uFEFF\xA0]+$/g, '')
-        if txt
-            return txt.split("\n")
+        return txt
+    return ''
+
+summary_li = (file)->
+    txt = await trim_read(file)
+    if txt
+        return txt.split("\n")
     return []
 
 summary_import = (hostpath, dir)->
@@ -55,6 +64,60 @@ _sort = (dirpath)->
 
 
 module.exports = exports = {
+    sort_summary:(hostpath, li)->
+        summary = path.join(hostpath, DIR_MD, SUMMARY)
+        txt = (await trim_read(summary)).split('\n')
+        r = []
+        t = undefined
+        for line in txt
+            if line.startsWith('* ')
+                t = []
+                r.push [line, t]
+            else
+                if t and not line.charAt(0).trim()
+                    t.push line
+                else
+                    t = undefined
+                    r.push line
+        num = 0
+        pos2txt = {}
+        pos_li = []
+        old_li = []
+        for i,pos in r
+            if i instanceof Array
+                h1 = i[0]
+                en = url_by_link(h1)
+                new_pos = li.indexOf(en)
+                if new_pos >= 0
+                    old_li.push pos
+                    pos2txt[pos] = h1+"\n"+i[1].join('\n')
+                    pos_li.push([new_pos, pos])
+
+        pos_li.sort(
+            (a,b)=>a[0]-b[0]
+        )
+        for i, pos in old_li
+            r[i] = pos2txt[pos_li[pos][1]]
+
+        await fs.writeFile(summary, r.join('\n'))
+        return
+
+    sort_md:(hostpath, dir, li)->
+        md_path = await path.join(hostpath, DIR_MD, dir, SUMMARY)
+        pos_li = []
+        en_line = []
+        txt_li = await summary_li(md_path)
+        for i, pos in txt_li
+            if i.startsWith("* [")
+                pos_li.push pos
+                en_line.push [li.indexOf(url_by_link(i)), i]
+        en_line.sort((a,b)->a[0]-b[0])
+        for pos, i in pos_li
+            txt_li[pos] = en_line[i][1]
+        await fs.writeFile(md_path, txt_li.join('\n'))
+        summary_import(hostpath, dir)
+        return
+
     sort: (hostpath, dir)->
         await _sort(path.join(hostpath, DIR_MD, dir))
 
@@ -67,7 +130,6 @@ module.exports = exports = {
         exist = 0
         suffix = "](#{basename})"
         link = "* ["+title+suffix
-        console.log file,"!!!"
         if not file.startsWith("!/")
             for line, pos in li
                 i = trimStart(line)
@@ -202,9 +264,26 @@ module.exports = exports = {
 
 
     li : (root)->
+        summary = path.join(root, SUMMARY)
+        txt = (await fs.readFile(summary, 'utf-8')).split("\n")
         dir_li = []
+        existed = new Set()
+        for i in txt
+            if i.startsWith("* [")
+                pos =  i.indexOf('](')
+                if pos > 0
+                    cn = i.slice(i.indexOf("[")+1, pos)
+                    en = i.slice(pos+2)
+                    en = en.slice(0, en.lastIndexOf(')'))
+                    dir_li.push([en, cn])
+                    existed.add en
+
         for dir in (await fs.readdir(root))
-            if dir == "!" or dir.slice(-3) == ".md"
+            if (
+                existed.has(dir) or \
+                dir == "!" or \
+                dir.slice(-3) == ".md"
+            )
                 continue
             summary = path.join(root, dir, SUMMARY)
             li = await summary_li(summary)
