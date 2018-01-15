@@ -24,7 +24,6 @@ init_git = (path)->
     _ing = undefined
 
     sync = ->
-        msg '正在部署更新'
         file_li = []
         for i in _todo
             if i.charAt(0) != '/'
@@ -36,7 +35,6 @@ init_git = (path)->
         catch err
             console.trace(err)
         await git.run 'add -u'
-        await git.commit('.')
 
         status = await git.status()
         count = 0
@@ -44,6 +42,10 @@ init_git = (path)->
             count += status[i].length
         if not count
             return
+
+        msg '正在部署更新'
+        await git.commit('.')
+
         try
             await git.pull()
         catch err
@@ -53,7 +55,14 @@ init_git = (path)->
             await git.run 'add -u'
             await git.commit('.')
 
-        await git.run 'push -f'
+        repo_set = new Set()
+        for i in (await git.run("config -l")).split("\n")
+            if i.startsWith("remote.")
+                repo = i.split(".")[1]
+                if repo_set.has repo
+                    continue
+                repo_set.add(repo)
+                await git.run 'push -f '+repo
         msg "部署成功"
 
         if _todo.length

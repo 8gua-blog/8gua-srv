@@ -12,7 +12,7 @@ module.exports = {
         file = req.params['*']
         # file 为空是首页点击，file 为 / 为侧栏新建，逻辑不太一样
         if not file or file == '/'
-            draft = "!/draft"
+            draft = "$"
             li = await glob_md(path.join(prefix, draft))
             if file
                 begin = li.length

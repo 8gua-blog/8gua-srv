@@ -288,7 +288,7 @@ module.exports = exports = {
         for dir in (await fs.readdir(root))
             if (
                 existed.has(dir) or \
-                dir == "!" or \
+                "!$".indexOf(dir.charAt(0)) >= 0 or \
                 dir.slice(-3) == ".md"
             )
                 continue

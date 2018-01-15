@@ -31,10 +31,7 @@ to_markdown = (html)->
     turndownService.turndown(html)
 
 DIR_MD = "-/md/"
-DIR_LI = "draft".split ' '
-do ->
-    for i,pos in DIR_LI
-        DIR_LI[pos] = "!/"+i
+DIR_LI = "$".split ' '
 DIR_LI_LEN = DIR_LI.length
 CACHE = {}
 
@@ -70,7 +67,7 @@ module.exports = {
             await md_dir.add(hostpath, h1, file, old_file)
         else
             url = ''
-            if file.slice(0,8) != "!/draft/"
+            if file.slice(0,2) != "$/"
                 file = file+tmp
         filepath = DIR_MD+file
         md = to_markdown(html).trim()

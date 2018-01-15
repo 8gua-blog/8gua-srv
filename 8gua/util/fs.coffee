@@ -10,7 +10,7 @@ module.exports = {
 
         count = 0
 
-        if file.startsWith("!/draft/") and /^\d+$/.test(basename)
+        if file.startsWith("$/") and /^\d+$/.test(basename)
             basename = today
             count = 1
 
