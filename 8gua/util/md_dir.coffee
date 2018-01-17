@@ -1,9 +1,12 @@
 {startsWith, padStart, trimStart, trimEnd, trim} = require 'lodash'
+firstline = require 'firstline'
+glob_md = require('8gua/util/glob_md')
 toml = require 'toml'
 Git = require '8gua/util/git'
 toml_config = require "8gua/lib/toml_config"
 fs = require 'fs-extra'
 path = require 'path'
+glob = require "glob-promise"
 
 SUMMARY = "SUMMARY.md"
 DIR_MD= "-/md"
@@ -24,6 +27,8 @@ summary_li = (file)->
     if txt
         return txt.split("\n")
     return []
+
+
 
 summary_import = (hostpath, dir)->
     prefix = path.join(hostpath, DIR_MD)
@@ -62,8 +67,55 @@ _sort = (dirpath)->
         sort = (toml_config(init).read()).sort or sort
     return sort
 
+CACHE = {}
+module.exports = md_dir = {
+    li_md_h1:(hostpath, dir_list)->
+        cache_host = CACHE[hostpath] = CACHE[hostpath] or {}
 
-module.exports = exports = {
+        li = []
+
+        prefix = path.join(hostpath, DIR_MD)
+
+        for i in dir_list
+            li.push glob_md(path.join(prefix , i))
+
+        file_li = await Promise.all(li)
+        #清除不存在的文件
+        cache_host_ = {}
+        r = []
+        for dir,pos in dir_list
+            cache_ = {}
+            li = []
+            offset = prefix.length + dir.length + 1
+            cache = cache_host[dir] or {}
+            for [file,mtimeMs, size] in file_li[pos]
+                title = undefined
+
+                f = file.slice(offset)
+                if f of cache
+                    [mtimeMs_, size_, title_] = cache[f]
+                    if mtimeMs_ == mtimeMs and size_ == size
+                        title = title_
+
+                if title == undefined
+                    title = (await firstline(file)).slice(0, 255)
+
+                title = trim(title.trim(), "#").trim()
+                if not title
+                    title = "无题 "+(new Date(mtimeMs)).toISOString().replace("T"," ").slice(0, 19)
+                li.push([mtimeMs, path.basename(f), title])
+
+                cache_[f] = [mtimeMs, size, title]
+            li.sort (a,b) ->
+                b[0] - a[0]
+            for i in li
+                i.shift()
+            r.push li
+            cache_host_[dir] = cache_
+
+        CACHE[hostpath] = cache_host_
+        return r
+
     sort_summary:(hostpath, li)->
         summary = path.join(hostpath, DIR_MD, SUMMARY)
         txt = (await trim_read(summary)).split('\n')
@@ -304,7 +356,7 @@ module.exports = exports = {
         return dir_li
 
     li : (root)->
-        dir_li = await exports.li_md(root)
+        dir_li = await md_dir.li_md(root)
 
         existed = new Set()
         for [en, cn] in dir_li
@@ -318,14 +370,46 @@ module.exports = exports = {
             )
                 continue
             summary = await fs.readFile(path.join(root, dir, SUMMARY))
-            title = exports.md_h1(summary)
+            title = md_dir.md_h1(summary)
             if not title
                 title = dir
 
             dir_li.push([dir, title])
         return dir_li
+    tree : (dir)->
+        dir_len = dir.length+1
+        existed = new Set()
+        show = []
+
+        for [file, name] in (
+            await md_dir.summary_url_li(dir)
+        )
+            existed.add(file)
+            show.push file+" "+name
+
+        no_show = []
+        for i in await glob(path.join(dir,"**/*.md"))
+            i = i.slice(dir_len)
+            if i == SUMMARY or existed.has(i)
+                continue
+            no_show.push(i)
+
+        return [
+            show.join("\n")
+            no_show.join("\n")
+        ]
+
+    summary_url_li : (dir)->
+        file = path.join(dir, SUMMARY)
+        r = []
+        for i in (await summary_li(file))
+            if i.startsWith("* ")
+                i = i.slice(2).trim()
+                [name, url] = i.split("](")
+                r.push([url.slice(0,-1), name.slice(1)])
+        return r
     md_h1 : (summary)->
-        summary = summary.split("\n")
+        li = summary.split("\n")
         for i in li
             if i.startsWith("# ")
                 return i.slice(1).trim()

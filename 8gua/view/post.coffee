@@ -7,8 +7,6 @@ save = require('8gua/util/save')
 fs = require 'fs-extra'
 path = require 'path'
 {isEmpty} = require("lodash")
-firstline = require 'firstline'
-glob_md = require('8gua/util/glob_md')
 TurndownService = require('turndown')
 turndownService = new TurndownService({
     hr:'---'
@@ -36,16 +34,6 @@ DIR_LI = "$".split ' '
 DIR_LI_LEN = DIR_LI.length
 CACHE = {}
 
-md_menu = (hostpath, file, h1, md)->
-    file = file.slice(2)
-    dir = path.join(hostpath, DIR_MD, '~')
-    showpath = path.join(dir,  ".menu", file)
-    show = await fs.pathExists(showpath)
-    if (h1 or md) and show
-        await md_dir.add_url(dir, file, h1)
-    else
-        await md_dir.rm_url(dir, file)
-    return
 
 module.exports = {
     post: ({hostpath, body}, reply)->
@@ -84,10 +72,6 @@ module.exports = {
         md = to_markdown(html).trim()
         h1 = h1.trim()
 
-        # 有url表示不是临时保存，而是正式发布
-        if git and file.startsWith("~/")
-            await md_menu(hostpath, file, h1, md)
-
 
         if h1 or md
             md = "# "+ h1 + "\n" +md
@@ -109,64 +93,21 @@ module.exports = {
         reply.send url
 
     get : ({hostpath}, reply)=>
-
-        cache_host = CACHE[hostpath] = CACHE[hostpath] or {}
-
-        li = []
-
-        prefix = path.join(hostpath, DIR_MD)
-
         dir_li = []
         name_li = []
+        r = [name_li, dir_li]
 
+        prefix = path.join(hostpath, DIR_MD)
         for [dir, name] in (await md_dir.li(prefix))
             dir_li.push dir
             name_li.push name
-
-        for i in DIR_LI
-            li.push glob_md(path.join(prefix , i))
-
-        file_li = await Promise.all(li)
-        r = [name_li, dir_li]
-        #清除不存在的文件
-        cache_host_ = {}
-
-        for dir,pos in DIR_LI
-            cache_ = {}
-            li = []
-            offset = prefix.length + dir.length + 1
-            cache = cache_host[dir] or {}
-            for [file,mtimeMs, size] in file_li[pos]
-                title = undefined
-
-                f = file.slice(offset)
-                if f of cache
-                    [mtimeMs_, size_, title_] = cache[f]
-                    if mtimeMs_ == mtimeMs and size_ == size
-                        title = title_
-
-                if title == undefined
-                    title = (await firstline(file)).slice(0, 255)
-
-                title = trim(title.trim(), "#").trim()
-                if not title
-                    title = "无题 "+(new Date(mtimeMs)).toISOString().replace("T"," ").slice(0, 19)
-                li.push([mtimeMs, path.basename(f), title])
-
-                cache_[f] = [mtimeMs, size, title]
-            li.sort (a,b) ->
-                b[0] - a[0]
-            for i in li
-                i.shift()
-            r.push li
-            cache_host_[dir] = cache_
+        r = r.concat(await md_dir.li_md_h1(hostpath, DIR_LI))
 
         for i in dir_li
             r.push(
                 await md_dir.li_md(path.join(hostpath, DIR_MD, i))
             )
 
-        CACHE[hostpath] = cache_host_
 
         reply.send r
         # file = "-/md/draft/0.md"

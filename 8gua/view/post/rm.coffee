@@ -39,7 +39,7 @@ module.exports =  {
         prefix = path.join(hostpath, "-/md")
         file = req.params['*']
         filepath = path.join(prefix, file)
-        if file.slice(0,2) == "$/"
+        if file.startsWith "$/.trash"
             console.log file
         else
             stat = await fs.lstat(filepath)
@@ -50,12 +50,20 @@ module.exports =  {
                 else
                     rm = 0
             else
-                tofile = name_unique(path.join(prefix, "$/", file))
+                tofile = name_unique(path.join(prefix, "$/.trash", file))
                 await fs.mkdirp(path.dirname(tofile))
                 tmppath = filepath+TMP
                 await fs.move(filepath, tofile,  { overwrite: true })
                 if await fs.pathExists(tmppath)
                     await fs.move(tmppath, tofile+TMP,  { overwrite: true })
+                if file.startsWith("~/")
+                    dirpath = path.join(hostpath, "-/md/~")
+                    file_ = file.slice(2)
+                    await md_dir.rm_url(
+                        dirpath
+                        file_
+                    )
+
             if rm
                 git = Git(hostpath)
                 await md_dir.rm(hostpath, file)
