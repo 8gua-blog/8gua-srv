@@ -1,3 +1,8 @@
+NODE_PATH = "/usr/local/lib/node_modules"
+if module.paths.indexOf(NODE_PATH) < 0
+    module.paths.push NODE_PATH
+
+
 path = require 'path'
 fs = require 'fs-extra'
 
