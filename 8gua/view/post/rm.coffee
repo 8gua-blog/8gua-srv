@@ -42,9 +42,14 @@ module.exports =  {
         if file.startsWith "$/.trash"
             console.log file
         else
-            stat = await fs.lstat(filepath)
+            is_exist = await fs.pathExists(filepath)
+            if is_exist
+                stat = await fs.lstat(filepath)
+                is_dir = stat.isDirectory()
+            else
+                is_dir = 0
             rm = 1
-            if stat.isDirectory()
+            if is_dir
                 if not (await glob_md(filepath)).length
                     await fs.remove(filepath)
                 else
@@ -53,9 +58,13 @@ module.exports =  {
                 tofile = name_unique(path.join(prefix, "$/.trash", file))
                 await fs.mkdirp(path.dirname(tofile))
                 tmppath = filepath+TMP
-                await fs.move(filepath, tofile,  { overwrite: true })
+                if is_exist
+                    await fs.move(filepath, tofile,  { overwrite: true })
                 if await fs.pathExists(tmppath)
                     await fs.move(tmppath, tofile+TMP,  { overwrite: true })
+
+            if rm
+                git = Git(hostpath)
                 if file.startsWith("~/")
                     dirpath = path.join(hostpath, "-/md/~")
                     file_ = file.slice(2)
@@ -63,10 +72,8 @@ module.exports =  {
                         dirpath
                         file_
                     )
-
-            if rm
-                git = Git(hostpath)
-                await md_dir.rm(hostpath, file)
+                else
+                    await md_dir.rm(hostpath, file)
                 git.sync()
         reply.send {}
 }
