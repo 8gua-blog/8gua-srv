@@ -102,7 +102,7 @@ module.exports = exports = {
         await fs.writeFile(summary, r.join('\n'))
         return
 
-    sort_md:(hostpath, dir, li)->
+    sort_md :(hostpath, dir, li)->
         md_path = await path.join(hostpath, DIR_MD, dir, SUMMARY)
         pos_li = []
         en_line = []
@@ -118,10 +118,10 @@ module.exports = exports = {
         summary_import(hostpath, dir)
         return
 
-    sort: (hostpath, dir)->
+    sort : (hostpath, dir)->
         await _sort(path.join(hostpath, DIR_MD, dir))
 
-    add:(hostpath, title, file, old)->
+    add : (hostpath, title, file, old)->
         dirname = path.dirname(file)
         dirpath = path.join(hostpath, DIR_MD, dirname)
         summary = path.join(dirpath, SUMMARY)
@@ -130,7 +130,7 @@ module.exports = exports = {
         exist = 0
         suffix = "](#{basename})"
         link = "* ["+title+suffix
-        if not file.startsWith("!/")
+        if not file.startsWith("~/")
             for line, pos in li
                 i = trimStart(line)
                 if i.indexOf(suffix) > 0 and i.startsWith("* ")
@@ -154,7 +154,7 @@ module.exports = exports = {
             await fs.writeFile(summary, li.join("\n"))
             await summary_import(hostpath, dirname)
 
-        if old and not old.startsWith("!/")
+        if old and not old.startsWith("~/")
             dirname = path.dirname(old)
             oldpath = path.join(hostpath, DIR_MD, dirname, SUMMARY)
             li = await summary_li(oldpath)
@@ -239,8 +239,33 @@ module.exports = exports = {
             git.sync(dir_md)
             git.sync(index)
     }
+    rm_url : (dir, url)->
+        summary = path.join(dir, SUMMARY)
+        li = []
+        for i in await summary_li(summary)
+            if i.startsWith("* [") and i.indexOf("](#{url})") > 0
+                continue
+            li.push i
+        await fs.writeFile(summary, li.join("\n"))
+        return
+
+    add_url : (dir, url, h1)->
+        summary = path.join(dir, SUMMARY)
+        li = await summary_li(summary)
+        txt = "* [#{h1}](#{url})"
+        exist = 0
+        for i, pos in li
+            if i.startsWith("* [") and i.indexOf("](#{url})") > 0
+                li[pos] = txt
+                exist = 1
+        if not exist
+            li.push txt
+        await fs.writeFile(summary, li.join("\n"))
+        return
+
+
     rm : (hostpath, file)->
-        if file.startsWith('!/')
+        if file.startsWith('~/')
             return
         dirname = path.dirname(file)
         basename = path.basename(file)
@@ -288,22 +313,23 @@ module.exports = exports = {
         for dir in (await fs.readdir(root))
             if (
                 existed.has(dir) or \
-                "!$".indexOf(dir.charAt(0)) >= 0 or \
+                "~$".indexOf(dir.charAt(0)) >= 0 or \
                 dir.slice(-3) == ".md"
             )
                 continue
-            summary = path.join(root, dir, SUMMARY)
-            li = await summary_li(summary)
-            title = undefined
-            for i in li
-                if i.startsWith("# ")
-                    title = i.slice(1).trim()
-                    break
+            summary = await fs.readFile(path.join(root, dir, SUMMARY))
+            title = exports.md_h1(summary)
             if not title
                 title = dir
 
             dir_li.push([dir, title])
         return dir_li
+    md_h1 : (summary)->
+        summary = summary.split("\n")
+        for i in li
+            if i.startsWith("# ")
+                return i.slice(1).trim()
+        return ''
 # 1. 读取 根目录 SUMMARY.md
 # 2. 根据 根目录 SUMMARY.md 查找目录
 # 3. 录入 SUMMARY.md 中不存在的目录

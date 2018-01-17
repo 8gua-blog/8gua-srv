@@ -11,6 +11,7 @@ module.exports = {
         "post/edit/* post/edit"
         "post/rm/* post/rm"
         "post/dir"
+        "menu"
         "post"
         "-/* minus"
         '/ index'

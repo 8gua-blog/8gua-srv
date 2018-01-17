@@ -39,7 +39,7 @@ module.exports =  {
         prefix = path.join(hostpath, "-/md")
         file = req.params['*']
         filepath = path.join(prefix, file)
-        if file.slice(0,8) == "!/trash/"
+        if file.slice(0,2) == "$/"
             console.log file
         else
             stat = await fs.lstat(filepath)
@@ -50,7 +50,7 @@ module.exports =  {
                 else
                     rm = 0
             else
-                tofile = name_unique(path.join(prefix, "!/trash", file))
+                tofile = name_unique(path.join(prefix, "$/", file))
                 await fs.mkdirp(path.dirname(tofile))
                 tmppath = filepath+TMP
                 await fs.move(filepath, tofile,  { overwrite: true })

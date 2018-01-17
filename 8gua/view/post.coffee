@@ -1,5 +1,6 @@
 md_dir = require("8gua/util/md_dir")
 toml = require 'toml'
+Git = require '8gua/util/git'
 {move_autoname} = require('8gua/util/fs')
 save = require('8gua/util/save')
 {trim} = require "lodash"
@@ -35,6 +36,17 @@ DIR_LI = "$".split ' '
 DIR_LI_LEN = DIR_LI.length
 CACHE = {}
 
+md_menu = (hostpath, file, h1, md)->
+    file = file.slice(2)
+    dir = path.join(hostpath, DIR_MD, '~')
+    showpath = path.join(dir,  ".menu")
+    show = await fs.pathExists(showpath)
+    if (h1 or md) and show
+        await md_dir.add_url(dir, file, h1)
+    else
+        await md_dir.rm_url(dir, file)
+    return
+
 module.exports = {
     post: ({hostpath, body}, reply)->
         {html, h1, file, git, dir} = body
@@ -64,28 +76,36 @@ module.exports = {
         tmp = ".tmp"
         if git
             url = file.slice(0, -3)
-            await md_dir.add(hostpath, h1, file, old_file)
         else
             url = ''
-            if file.slice(0,2) != "$/"
+            if not file.startsWith("$/")
                 file = file+tmp
         filepath = DIR_MD+file
         md = to_markdown(html).trim()
         h1 = h1.trim()
+
+        # 有url表示不是临时保存，而是正式发布
+        if git and file.startsWith("~/")
+            await md_menu(hostpath, file, h1, md)
+
+
         if h1 or md
             md = "# "+ h1 + "\n" +md
+
             save hostpath, filepath, md, git
 
             if git
+                await md_dir.add(hostpath, h1, file, old_file)
                 tmppath = path.join(hostpath, filepath+tmp)
                 if await fs.pathExists(tmppath)
                     await fs.remove(tmppath)
         else
             fpath = path.join(hostpath, filepath)
-            if not git
-                fpath += tmp
             if await fs.pathExists(fpath)
                 await fs.remove(fpath)
+            if git
+                await md_dir.rm(hostpath, file)
+                Git(hostpath).sync()
         reply.send url
 
     get : ({hostpath}, reply)=>
