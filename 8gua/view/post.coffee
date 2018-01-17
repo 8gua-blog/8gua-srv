@@ -39,7 +39,7 @@ CACHE = {}
 md_menu = (hostpath, file, h1, md)->
     file = file.slice(2)
     dir = path.join(hostpath, DIR_MD, '~')
-    showpath = path.join(dir,  ".menu")
+    showpath = path.join(dir,  ".menu", file)
     show = await fs.pathExists(showpath)
     if (h1 or md) and show
         await md_dir.add_url(dir, file, h1)
