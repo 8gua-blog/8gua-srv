@@ -43,12 +43,14 @@ summary_import = (hostpath, dir)->
 
     index = path.join(prefix, SUMMARY)
     index_li = await summary_li(index)
-
+    dir_txt = dir_li.join("\n")
     begin = 0
+    exist = 0
     for i, pos in index_li
         if i.startsWith("* ") and i.indexOf(suffix) > 0
+            exist = 1
             begin = pos
-            index_li[pos] = dir_li.join("\n")
+            index_li[pos] = dir_txt
             ++pos
             while 1
                 if pos >= index_li.length
@@ -57,6 +59,8 @@ summary_import = (hostpath, dir)->
                     break
                 index_li.splice(pos, 1)
             break
+    if not exist
+        index_li.push dir_txt
     await fs.writeFile(index, index_li.join("\n"))
     return
 
@@ -118,7 +122,10 @@ module.exports = md_dir = {
 
     sort_summary:(hostpath, li)->
         summary = path.join(hostpath, DIR_MD, SUMMARY)
-        txt = (await trim_read(summary)).split('\n')
+        txt = (await trim_read(summary))
+        if not txt
+            return
+        txt = txt.split('\n')
         r = []
         t = undefined
         for line in txt
@@ -182,7 +189,7 @@ module.exports = md_dir = {
         exist = 0
         suffix = "](#{basename})"
         link = "* ["+title+suffix
-        if not file.startsWith("~/")
+        if not file.startsWith("$/")
             for line, pos in li
                 i = trimStart(line)
                 if i.indexOf(suffix) > 0 and i.startsWith("* ")
@@ -202,11 +209,10 @@ module.exports = md_dir = {
                             break
                     if not pushed
                         li.push link
-
             await fs.writeFile(summary, li.join("\n"))
             await summary_import(hostpath, dirname)
 
-        if old and not old.startsWith("~/")
+        if old and not old.startsWith("$/")
             dirname = path.dirname(old)
             oldpath = path.join(hostpath, DIR_MD, dirname, SUMMARY)
             li = await summary_li(oldpath)
@@ -369,7 +375,7 @@ module.exports = md_dir = {
                 dir.slice(-3) == ".md"
             )
                 continue
-            summary = await fs.readFile(path.join(root, dir, SUMMARY))
+            summary = await fs.readFile(path.join(root, dir, SUMMARY), 'utf-8')
             title = md_dir.md_h1(summary)
             if not title
                 title = dir

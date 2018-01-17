@@ -72,7 +72,6 @@ module.exports = {
         md = to_markdown(html).trim()
         h1 = h1.trim()
 
-
         if h1 or md
             md = "# "+ h1 + "\n" +md
 
