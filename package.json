@@ -12,7 +12,7 @@
         "fastify": "^0.38.0",
         "fastify-formbody": "^1.1.0",
         "fastify-multipart": "^0.4.0",
-        "firstline": "git+https://gitee.com/i8gua/firstline.git",
+        "firstline": "git+https://github.com/8gua-blog/firstline.git",
         "font-spider": "^1.3.4",
         "fs-extra": "^5.0.0",
         "glob-promise": "^3.3.0",
@@ -28,7 +28,7 @@
         "toml": "^2.3.3",
         "tomlify-j0.4": "^3.0.0",
         "turndown": "^4.0.1",
-        "turndown-plugin-gfm": "git+https://gitee.com/u8gua/turndown-plugin-gfm.git",
+        "turndown-plugin-gfm": "git+https://github.com/8gua-blog/turndown-plugin-gfm.git",
         "ws": "^3.3.3",
         "yargs": "^10.0.3"
     },
@@ -48,5 +48,5 @@
         "url": "https://github.com/8gua/8gua-cli-release.git"
     },
     "scripts": {},
-    "version": "0.0.41"
+    "version": "0.0.42"
 }
