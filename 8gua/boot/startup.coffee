@@ -26,7 +26,10 @@ module.exports = (turn) =>
         if turn
             data = (await fs.readFile(path.join(__dirname, '8gua.startup.plist'))).toString().replace(/#CMD/g, CMD)
             await fs.writeFile(plist, data)
-            {stderr} = await exec("reattach-to-user-namespace -l launchctl load -w #{plist}")
+            try
+                {stderr} = await exec("reattach-to-user-namespace -l launchctl load -w #{plist}")
+            catch
+                {stderr} = await exec("launchctl load -w #{plist}")
             if stderr
                 if stderr.indexOf('service already loaded') > 0
                     return
