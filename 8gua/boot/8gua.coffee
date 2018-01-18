@@ -17,12 +17,12 @@ module.exports = ->
     argv = yargs\
     .command(
         'map [host] [path]'
-        '映射网站与本地目录'
+        '关联 域名 和 本地目录（会自动读取CNAME、自动关联Github Page、Bitbucket Page、Gitee Page）'
         (yargs) =>
           yargs.positional('host', {
             type: 'string',
             default: '',
-            describe: '映射的域名（会自动读取CNAME、自动关联Github Page、Bitbucket Page、Gitee Page）'
+            describe: '想绑定的域名'
           })
         (argv) ->
             await require('./host-path')(argv.path or CWD, argv.host)
