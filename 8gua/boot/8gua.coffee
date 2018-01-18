@@ -20,7 +20,7 @@ module.exports = ->
         "手动运行服务器"
         =>
         =>
-            require("./8gua.srv.js")
+            require("./8gua.srv.js")()
     ).command(
         'map [host] [path]'
         '关联 域名 和 本地目录（会自动读取CNAME、自动关联Github Page、Bitbucket Page、Gitee Page）'
