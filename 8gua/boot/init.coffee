@@ -33,7 +33,9 @@ module.exports = (callback)->
             await sh( "git clone #{url} #{path_cli} --depth=1")
     ).then ->
         console.log "\n** 开始 安装依赖包，需要三五分钟，请稍等 …"
-        sh("#{NPM} --production install").then ->
-            console.log "\n** 成功 安装依赖包"
-            callback()
+        await sh("#{NPM} install -g yarn")
+        await sh("yarn config set registry https://registry.npm.taobao.org")
+        await sh("yarn")
+        console.log "\n** 成功 安装依赖包"
+        callback()
 

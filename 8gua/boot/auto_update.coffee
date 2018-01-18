@@ -47,7 +47,7 @@ module.exports =  (restart)->
             try
                 await sh('git checkout .')
                 await sh('git pull origin master')
-                await sh(require("./npm.json")+" install")
+                await sh("yarn")
                 restart()
             catch
                 reinit()
