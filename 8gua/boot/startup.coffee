@@ -44,6 +44,7 @@ module.exports = (turn) =>
                     return
                 console.log stderr
     else
+        AutoLaunch = require('auto-launch')
         cli = new AutoLaunch {
             name: '8gua'
             CMD
