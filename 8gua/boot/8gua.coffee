@@ -14,7 +14,19 @@ version = require("../../package.json").version
 
 module.exports = ->
 
-    argv = yargs.option('help', {
+    argv = yargs\
+    .command(
+        'get [git]'
+        '用模板仓库初始化网站'
+        (yargs) =>
+          yargs.positional('git', {
+            type: 'string',
+            default: 'https://gitee.com/blog-8gua/blog-8gua.git',
+            describe: '八卦博客默认模板'
+          })
+        (argv) ->
+            require('./get.coffee')(argv.git)
+    ).option('help', {
         alias:'h'
         describe: '显示帮助文档'
     }).option('startup',{
@@ -27,7 +39,6 @@ module.exports = ->
     }).usage("""8gua #{version} - 下一代分布式互联网\n官方主页 https://8gua.github.io 。""").version(
         version
     ).argv
-
 
     CONFIG = toml_config.read()
 
