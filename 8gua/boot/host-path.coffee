@@ -30,7 +30,7 @@ url_page_host = (url)->
                "#{host}.oschina.io"
             ]
 
-module.exports = (root)->
+module.exports = (root, bindhost)->
     host_path = {}
 
 
@@ -38,29 +38,32 @@ module.exports = (root)->
         git_path = path.join(p, '.git/config')
 
         if await fs.pathExists(git_path)
-            config = ini.parse(await fs.readFile(git_path, "utf-8"))
+            if bindhost
+                host_path[bindhost] = p
+            else
+                config = ini.parse(await fs.readFile(git_path, "utf-8"))
 
-            for k,v of config
-                if k.slice(0, 7) == "remote "
-                    try
-                        host_li = url_page_host(v.url)
-                    catch
-                        continue
-                    if host_li
-                        for host in host_li
-                            host_path[host] = p
-            cname_path = path.join(p, 'CNAME')
-            try
-                cname = await fs.readFile(cname_path, 'utf-8')
-            catch
-                cname = 0
+                for k,v of config
+                    if k.slice(0, 7) == "remote "
+                        try
+                            host_li = url_page_host(v.url)
+                        catch
+                            continue
+                        if host_li
+                            for host in host_li
+                                host_path[host] = p
+                cname_path = path.join(p, 'CNAME')
+                try
+                    cname = await fs.readFile(cname_path, 'utf-8')
+                catch
+                    cname = 0
 
-            if cname
-                cname = cname.replace(/\r/g, "\n").split("\n")
-                for i in cname
-                    i = i.trim()
-                    if i
-                        host_path[i] = p
+                if cname
+                    cname = cname.replace(/\r/g, "\n").split("\n")
+                    for i in cname
+                        i = i.trim()
+                        if i
+                            host_path[i] = p
 
             break
 
