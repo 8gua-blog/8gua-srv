@@ -323,7 +323,7 @@ module.exports = md_dir = {
 
 
     rm : (hostpath, file)->
-        if file.startsWith('~/')
+        if file.startsWith('!/')
             return
         dirname = path.dirname(file)
         basename = path.basename(file)
@@ -371,7 +371,7 @@ module.exports = md_dir = {
         for dir in (await fs.readdir(root))
             if (
                 existed.has(dir) or \
-                "~$".indexOf(dir.charAt(0)) >= 0 or \
+                "!$".indexOf(dir.charAt(0)) >= 0 or \
                 dir.slice(-3) == ".md"
             )
                 continue

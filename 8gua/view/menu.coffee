@@ -7,7 +7,7 @@ fs = require 'fs-extra'
 path = require 'path'
 
 DIR_MD = "-/md"
-DIR = "-/md/~"
+DIR = "-/md/!"
 
 
 module.exports = {
@@ -46,7 +46,7 @@ module.exports = {
             li.push mdfile
             filepath = path.join(...li)
 
-            if old != "~/"+mdfile
+            if old != "!/"+mdfile
                 if await fs.pathExists(filepath)
                     err.url = "路径已被占用，请用新的"
                     raise err
@@ -70,7 +70,7 @@ module.exports = {
 
     get: (req, reply)=>
         {hostpath} = req
-        li = await md_dir.tree(path.join(hostpath, "-/md/~"))
+        li = await md_dir.tree(path.join(hostpath, "-/md/!"))
         li = li.concat(await md_dir.li_md_h1(hostpath, ["$"]))
         reply.send li
 }

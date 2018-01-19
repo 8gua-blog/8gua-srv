@@ -1,4 +1,4 @@
-DIR = "-/md/~"
+DIR = "-/md/!"
 fs = require 'fs-extra'
 path = require 'path'
 md_dir = require("8gua/util/md_dir")

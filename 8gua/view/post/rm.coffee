@@ -65,8 +65,8 @@ module.exports =  {
 
             if rm
                 git = Git(hostpath)
-                if file.startsWith("~/")
-                    dirpath = path.join(hostpath, "-/md/~")
+                if file.startsWith("!/")
+                    dirpath = path.join(hostpath, "-/md/!")
                     file_ = file.slice(2)
                     await md_dir.rm_url(
                         dirpath
