@@ -36,7 +36,14 @@ module.exports = (git, cwd)->
     if not is_git
         console.error '当前目录不是有效的GIT仓库，无法初始化'
         return
+
+    cgit = (args)->
+        GIT(
+            "--work-tree=#{cwd} --git-dir=#{cwd}/.git "+args
+        )
+
     console.log "同步代码"
+
     root_len = root.length+1
     klaw(
         root
@@ -47,12 +54,15 @@ module.exports = (git, cwd)->
             rpath = ipath.slice(root_len)
             if rpath.startsWith(".git") or rpath.startsWith(".hg")
                 return
+
             is_link = item.stats.isSymbolicLink()
+            git_add = []
             if item.stats.isFile() or is_link
                 cpath = path.join(cwd, rpath)
                 copy = ->
                     console.log "\t" , rpath
                     await fs.copy(ipath, cpath)
+                    git_add.push(cgit "add -f #{rpath}")
 
                 if not is_link and await fs.pathExists(cpath)
                     hash = await GIT("hash-object #{ipath}")
@@ -68,4 +78,7 @@ module.exports = (git, cwd)->
                         await copy()
                 else
                     await copy()
+            await Promise.all(git_add)
+            await cgit("""commit -m">> 8gua get #{git}\"""")
+            await cgit("""push -f""")
     )
