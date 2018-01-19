@@ -14,7 +14,7 @@ CONFIG = toml_config.read(
     ROOT:path.join(os.homedir(), '.8gua')
 )
 
-module.exports = (git, cwd)->
+module.exports = (git, cwd, force)->
     # git@github.com:renolc/simple-git-promise.git
     # https://github.com/renolc/simple-git-promise.git
     if git.indexOf("://") > 0
@@ -33,15 +33,23 @@ module.exports = (git, cwd)->
     else
         await _GIT("--work-tree=#{root} --git-dir=#{root_git} pull")
         #await GIT("--work-tree=#{root} --git-dir=#{root_git} checkout .")
+    if not force
+        is_git = 0
+        for i in ["git", "hg"]
+            if await fs.pathExists(path.join(cwd,"."+i))
+                is_git = 1
 
-    is_git = 0
-    for i in ["git", "hg"]
-        if await fs.pathExists(path.join(cwd,"."+i))
-            is_git = 1
+        if not is_git
+            console.error '当前目录不是有效的GIT仓库，无法初始化'
+            return
 
-    if not is_git
-        console.error '当前目录不是有效的GIT仓库，无法初始化'
-        return
+        console.log "网站模板 #{git}\n是否导入此模板到当前仓库？"
+        confirm = new Confirm({
+            default:false
+            message:">>"
+        })
+        if not await confirm.run()
+            return
 
     cgit = (args)->
         _GIT "--work-tree=#{cwd} --git-dir=#{cwd}/.git "+args
