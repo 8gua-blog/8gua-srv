@@ -20,7 +20,7 @@ module.exports = {
                 if count == 0
                     basename = today
                 else
-                    basename = today+"~"+count
+                    basename = today+"."+count
                 count += 1
             else
                 break

@@ -47,14 +47,15 @@ module.exports = (git, cwd)->
             rpath = ipath.slice(root_len)
             if rpath.startsWith(".git") or rpath.startsWith(".hg")
                 return
-            if item.stats.isFile() or item.stats.isSymbolicLink()
-                hash = await GIT("hash-object #{ipath}")
+            is_link = item.stats.isSymbolicLink()
+            if item.stats.isFile() or is_link
                 cpath = path.join(cwd, rpath)
                 copy = ->
                     console.log "\t" , rpath
                     await fs.copy(ipath, cpath)
 
-                if await fs.pathExists(cpath)
+                if not is_link or await fs.pathExists(cpath)
+                    hash = await GIT("hash-object #{ipath}")
                     chash = await GIT("hash-object #{cpath}")
                     if hash == chash
                         return
