@@ -26,7 +26,7 @@ module.exports = (git, cwd, force)->
             console.error '当前目录不是有效的GIT仓库，无法初始化'
             return
 
-        console.log "网站模板 #{git}\n是否导入此模板到当前仓库？"
+        console.log "\n\n\n网站模板 #{git}\n是否导入此模板到当前仓库？"
         confirm = new Confirm({
             default:false
             message:">>"
