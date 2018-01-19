@@ -19,10 +19,10 @@ module.exports = (git, cwd, force)->
     config_path = path.join(cwd, SITE_CONFIG_PATH)
     config = toml_config(config_path)
 
-    site_config = {}
-
     if await fs.pathExists(config_path)
         site_config = config.read()
+    else
+        site_config = {}
 
     if not git
         git = site_config.GIT or GIT_TEMPLATE
@@ -45,6 +45,7 @@ module.exports = (git, cwd, force)->
         if not await confirm.run()
             return
 
+    console.log git
     console.log "更新网站模板 #{git}"
 
     prefix = path.join(CONFIG.ROOT, 'git')

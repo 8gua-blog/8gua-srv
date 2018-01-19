@@ -97,7 +97,7 @@ module.exports = git_site = {
             'end'
             ->
                 config.set {
-                    GIT:git
+                    GIT:url
                     VERSION : git_version
                 }
                 await Promise.all(runing)
@@ -105,7 +105,7 @@ module.exports = git_site = {
                     return
                 await cgit("add -f ./"+git_add.join(" ./"))
                 try
-                    await cgit("""commit -m">> 8gua get #{git}\"""")
+                    await cgit("""commit -m">> 8gua get #{url}\"""")
                     await cgit("""push -f""")
                 catch
                     console.log ""
