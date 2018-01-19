@@ -54,7 +54,7 @@ module.exports = (git, cwd)->
                     console.log "\t" , rpath
                     await fs.copy(ipath, cpath)
 
-                if not is_link or await fs.pathExists(cpath)
+                if not is_link and await fs.pathExists(cpath)
                     hash = await GIT("hash-object #{ipath}")
                     chash = await GIT("hash-object #{cpath}")
                     if hash == chash
