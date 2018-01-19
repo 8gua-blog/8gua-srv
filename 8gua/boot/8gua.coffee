@@ -11,7 +11,6 @@ yargs = require('yargs')
 toml_config = require("8gua/lib/toml_config_8gua")
 
 version = require("../../package.json").version
-GIT_TEMPLATE = 'https://gitee.com/blog-8gua/blog-8gua.git'
 #GIT_TEMPLATE = 'https://github.com/8gua-site/8gua-site.github.io.git'
 module.exports = ->
 
@@ -40,11 +39,11 @@ module.exports = ->
           yargs.positional('git', {
             type: 'string',
             # default: 'https://gitee.com/blog-8gua/blog-8gua.git',
-            default: GIT_TEMPLATE,
+            default: '',
             describe: '八卦博客默认模板'
           })
         (argv) ->
-            await require('./get.coffee')(argv.git, CWD, argv.yes)
+            await require('./get.coffee')(argv.git, CWD, argv.force)
     ).option('help', {
         alias:'h'
         describe: '显示帮助文档'
@@ -73,7 +72,7 @@ module.exports = ->
         require("./startup.coffee") CONFIG.STARTUP
 
     if process.argv.length == 2
-        await require("./cli-default")(CWD, GIT_TEMPLATE, argv)
+        await require("./cli-default")(CWD, '', argv)
 
     toml_config.write CONFIG
 
