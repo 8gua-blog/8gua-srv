@@ -80,8 +80,11 @@ module.exports = (git, cwd)->
                         await copy()
                 else
                     await copy()
+    ).on(
+        'end'
+        ->
+            await cgit("add -f ./"+git_add.join(" ./"))
+            await cgit("""commit -m">> 8gua get #{git}\"""")
+            await cgit("""push -f""")
     )
 
-    await cgit("add -f ./"+git_add.join(" ./"))
-    await cgit("""commit -m">> 8gua get #{git}\"""")
-    await cgit("""push -f""")
