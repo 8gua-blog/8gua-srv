@@ -64,7 +64,7 @@ module.exports = (git, cwd)->
                 copy = ->
                     console.log "\t" , rpath
                     await fs.copy(ipath, cpath)
-                    git_add.push(cgit "add -f ./#{rpath}")
+                    git_add.push(rpath)
 
                 if not is_link and await fs.pathExists(cpath)
                     hash = await _GIT("hash-object #{ipath}")
@@ -81,6 +81,6 @@ module.exports = (git, cwd)->
                 else
                     await copy()
     )
-    await Promise.all(git_add)
+    await cgit("add -f ./"+" ./".join(git_add))
     await cgit("""commit -m">> 8gua get #{git}\"""")
     await cgit("""push -f""")
