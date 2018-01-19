@@ -1,4 +1,5 @@
 GIT = require('cmd-executor').git
+Confirm = require('prompt-confirm')
 
 _GIT = (str)->
     str =  str.replace(/!/g,'\\!')
