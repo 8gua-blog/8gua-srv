@@ -10,6 +10,7 @@ class WsHost
         {host} = url.parse(req.headers.origin)
 
         host_path = HOST_PATH.get(host)
+        ws.send ">host #{(not not host_path)-0}"
         if not (host_path of _dict)
             _dict[host_path] = []
         li = _dict[host_path]
