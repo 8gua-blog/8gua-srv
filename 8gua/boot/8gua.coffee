@@ -51,6 +51,9 @@ module.exports = ->
         alias : 's'
         describe: '启用开机启动'
         type: 'boolean'
+    }).option('force', {
+        describe: '强制执行'
+        type:'boolean'
     }).option('startup_off', {
         describe: '禁用开机启动'
         type: 'boolean'
@@ -71,7 +74,7 @@ module.exports = ->
     if argv.startup or argv.startup_off
         require("./startup.coffee") CONFIG.STARTUP
 
-    if process.argv.length == 2
+    if process.argv.length == 2 or (argv.force and process.argv.length==3)
         await require("./cli-default")(CWD, '', argv)
 
     toml_config.write CONFIG
