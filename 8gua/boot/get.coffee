@@ -83,6 +83,7 @@ module.exports = (git, cwd)->
     ).on(
         'end'
         ->
+            console.log "ADD", git_add
             await cgit("add -f ./"+git_add.join(" ./"))
             await cgit("""commit -m">> 8gua get #{git}\"""")
             await cgit("""push -f""")
