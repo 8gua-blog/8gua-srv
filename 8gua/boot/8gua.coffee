@@ -44,7 +44,7 @@ module.exports = ->
             describe: '八卦博客默认模板'
           })
         (argv) ->
-            await require('./get.coffee')(argv.git, CWD)
+            await require('./get.coffee')(argv.git, CWD, argv.yes)
     ).option('help', {
         alias:'h'
         describe: '显示帮助文档'
