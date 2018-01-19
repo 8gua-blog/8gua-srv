@@ -11,7 +11,8 @@ yargs = require('yargs')
 toml_config = require("8gua/lib/toml_config_8gua")
 
 version = require("../../package.json").version
-GIT_TEMPLATE = 'https://github.com/8gua-site/8gua-site.github.io.git'
+GIT_TEMPLATE = 'https://gitee.com/blog-8gua/blog-8gua.git'
+#GIT_TEMPLATE = 'https://github.com/8gua-site/8gua-site.github.io.git'
 module.exports = ->
 
     argv = yargs\
