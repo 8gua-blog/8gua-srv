@@ -47,7 +47,7 @@ module.exports =  (restart)->
             try
                 await sh('git checkout .')
                 await sh('git pull origin master')
-                await sh("yarn")
+                await sh("./node_modules/yarn/bin/yarn")
                 restart()
             catch
                 reinit()

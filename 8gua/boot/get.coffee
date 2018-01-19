@@ -45,6 +45,7 @@ module.exports = (git, cwd)->
     console.log "同步代码"
 
     root_len = root.length+1
+    git_add = []
     klaw(
         root
     ).on(
@@ -56,7 +57,6 @@ module.exports = (git, cwd)->
                 return
 
             is_link = item.stats.isSymbolicLink()
-            git_add = []
             if item.stats.isFile() or is_link
                 cpath = path.join(cwd, rpath)
                 copy = ->
@@ -78,7 +78,7 @@ module.exports = (git, cwd)->
                         await copy()
                 else
                     await copy()
-            await Promise.all(git_add)
-            await cgit("""commit -m">> 8gua get #{git}\"""")
-            await cgit("""push -f""")
     )
+    await Promise.all(git_add)
+    await cgit("""commit -m">> 8gua get #{git}\"""")
+    await cgit("""push -f""")
