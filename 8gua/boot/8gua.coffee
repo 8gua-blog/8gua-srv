@@ -73,7 +73,7 @@ module.exports = ->
         require("./startup.coffee") CONFIG.STARTUP
 
     if process.argv.length == 2
-        await require("./cli-default")(CWD, GIT_TEMPLATE)
+        await require("./cli-default")(CWD, GIT_TEMPLATE, argv)
 
     toml_config.write CONFIG
 
