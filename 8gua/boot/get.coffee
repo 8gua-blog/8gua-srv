@@ -1,4 +1,8 @@
 GIT = require('cmd-executor').git
+
+_GIT = (str)->
+    GIT(str.replace(/!/g,'\\!'))
+
 klaw = require('klaw')
 toml_config = require("8gua/lib/toml_config_8gua")
 fs = require 'fs-extra'
@@ -25,7 +29,7 @@ module.exports = (git, cwd)->
         await GIT.config('--global http.postBuffer 524288000')
         await GIT.clone(git, root)
     else
-        await GIT("--work-tree=#{root} --git-dir=#{root_git} pull")
+        await _GIT("--work-tree=#{root} --git-dir=#{root_git} pull")
         #await GIT("--work-tree=#{root} --git-dir=#{root_git} checkout .")
 
     is_git = 0
@@ -38,9 +42,7 @@ module.exports = (git, cwd)->
         return
 
     cgit = (args)->
-        GIT(
-            "--work-tree=#{cwd} --git-dir=#{cwd}/.git "+args
-        )
+        _GIT "--work-tree=#{cwd} --git-dir=#{cwd}/.git "+args
 
     console.log "同步代码"
 
@@ -62,16 +64,16 @@ module.exports = (git, cwd)->
                 copy = ->
                     console.log "\t" , rpath
                     await fs.copy(ipath, cpath)
-                    git_add.push(cgit "add -f #{rpath}")
+                    git_add.push(cgit "add -f ./#{rpath}")
 
                 if not is_link and await fs.pathExists(cpath)
-                    hash = await GIT("hash-object #{ipath}")
-                    chash = await GIT("hash-object #{cpath}")
+                    hash = await _GIT("hash-object #{ipath}")
+                    chash = await _GIT("hash-object #{cpath}")
                     if hash == chash
                         return
                     exist = 1
                     try
-                        await GIT("--git-dir=#{root_git} cat-file -t #{chash}")
+                        await _GIT("--git-dir=#{root_git} cat-file -t #{chash}")
                     catch
                         exist = 0
                     if exist
