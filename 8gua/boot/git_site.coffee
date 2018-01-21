@@ -84,6 +84,7 @@ module.exports = git_site = {
                         await _GIT("--git-dir=#{root_git} cat-file -t #{chash}")
                     catch
                         exist = 0
+                        console.log rpath, "已改动，跳过"
                     if exist
                         await copy()
 
