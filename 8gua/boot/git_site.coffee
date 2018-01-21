@@ -40,6 +40,7 @@ module.exports = git_site = {
         git_version = await git_site.pull(root, url)
 
         git_add = []
+        change_li = []
         if git_version == site_config.VERSION
             if not force
                 return 1
@@ -84,7 +85,7 @@ module.exports = git_site = {
                         await _GIT("--git-dir=#{root_git} cat-file -t #{chash}")
                     catch
                         exist = 0
-                        console.log rpath, "已改动，跳过"
+                        change_li.push rpath
                     if exist
                         await copy()
 
@@ -102,6 +103,10 @@ module.exports = git_site = {
                     VERSION : git_version
                 }
                 await Promise.all(runing)
+                if change_li.length
+                    console.log "以下文件，已被改动，略过同步 (想要强制同步，删除它们即可)"
+                    for i in change_li
+                        console.log i
                 if not git_add.length
                     return
                 await cgit("add -f ./"+git_add.join(" ./"))

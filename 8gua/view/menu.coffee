@@ -1,4 +1,3 @@
-save = require('8gua/util/save')
 md_dir = require("8gua/util/md_dir")
 git = require '8gua/util/git'
 {trim} = require('lodash')

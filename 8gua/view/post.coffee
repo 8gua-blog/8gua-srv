@@ -78,7 +78,8 @@ module.exports = {
             save hostpath, filepath, md, git
 
             if git
-                await md_dir.add(hostpath, h1, file, old_file)
+                if not file.startsWith("!/")
+                    await md_dir.add(hostpath, h1, file, old_file)
                 tmppath = path.join(hostpath, filepath+tmp)
                 if await fs.pathExists(tmppath)
                     await fs.remove(tmppath)
