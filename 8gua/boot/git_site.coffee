@@ -82,7 +82,7 @@ module.exports = git_site = {
                         return
                     exist = 1
                     try
-                        await _GIT("--git-dir=#{root_git} cat-file -t #{chash}")
+                        await _GIT("--git-dir=#{root}/.git cat-file -t #{chash}")
                     catch
                         exist = 0
                         change_li.push rpath
