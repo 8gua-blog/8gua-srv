@@ -3,13 +3,14 @@ firstline = require 'firstline'
 glob_md = require('8gua/util/glob_md')
 toml = require 'toml'
 Git = require '8gua/util/git'
+ln_fs = require '8gua/util/ln_fs'
 toml_config = require "8gua/lib/toml_config"
 fs = require 'fs-extra'
 path = require 'path'
 glob = require "glob-promise"
 
 SUMMARY = "SUMMARY.md"
-DIR_MD= "-/md"
+DIR_MD= "md"
 
 url_by_link = (line)->
     en = line.slice(line.indexOf('](')+2)
@@ -73,12 +74,12 @@ _sort = (dirpath)->
 
 CACHE = {}
 module.exports = md_dir = {
-    li_md_h1:(hostpath, dir_list)->
+    li_md_h1:(hostpath, dir_list, root=DIR_MD)->
         cache_host = CACHE[hostpath] = CACHE[hostpath] or {}
 
         li = []
 
-        prefix = path.join(hostpath, DIR_MD)
+        prefix = path.join(hostpath, root)
 
         for i in dir_list
             li.push glob_md(path.join(prefix , i))
@@ -190,6 +191,8 @@ module.exports = md_dir = {
         suffix = "](#{basename})"
         link = "* ["+title+suffix
         if not file.startsWith("$/")
+            await ln_fs.ln(hostpath, DIR_MD, file)
+
             for line, pos in li
                 i = trimStart(line)
                 if i.indexOf(suffix) > 0 and i.startsWith("* ")
@@ -212,7 +215,10 @@ module.exports = md_dir = {
             await fs.writeFile(summary, li.join("\n"))
             await summary_import(hostpath, dirname)
 
+
         if old and not old.startsWith("$/")
+            await ln_fs.rm(hostpath, path.join(DIR_MD, old))
+
             dirname = path.dirname(old)
             oldpath = path.join(hostpath, DIR_MD, dirname, SUMMARY)
             li = await summary_li(oldpath)
@@ -231,6 +237,28 @@ module.exports = md_dir = {
         return ''
 
     dir : {
+        rename:(hostpath, dir, name, old)->
+            index = path.join(hostpath, DIR_MD, SUMMARY)
+            li = (await fs.readFile(index,"utf-8")).split("\n")
+            now = "](#{dir}/"
+            pre = "](#{old}/"
+            for i,pos in li
+                i = trimEnd(i)
+                if i.endsWith("](#{old})") and i.startsWith("* [")
+                    li[pos] = """* [#{name}](#{dir})"""
+                else
+                    line = trimStart(i)
+                    if line.startsWith("* [") and line.indexOf(pre)>0
+                        li[pos] = i.replace(pre, now)
+            await fs.writeFile(index, li.join("\n"))
+            dir_summary = path.join(hostpath, DIR_MD, dir, SUMMARY)
+            li = await summary_li(dir_summary)
+            if li.length
+                for i,pos in li
+                    if i.startsWith("# ")
+                        li[pos] = "# "+name
+            await fs.writeFile(dir_summary, li.join("\n"))
+
         set:(hostpath, dir, name)->
             dir_md = path.join(DIR_MD, dir)
             dir_path = path.join(hostpath, dir_md)
@@ -297,8 +325,9 @@ module.exports = md_dir = {
             git.sync(dir_md)
             git.sync(index)
     }
-    rm_url : (dir, url)->
-        summary = path.join(dir, SUMMARY)
+    rm_url : (hostpath, url)->
+        await ln_fs.rm(hostpath, "!"+url)
+        summary = path.join(hostpath, DIR_MD, "!", SUMMARY)
         li = []
         for i in await summary_li(summary)
             if i.startsWith("* [") and i.indexOf("](#{url})") > 0
@@ -307,8 +336,8 @@ module.exports = md_dir = {
         await fs.writeFile(summary, li.join("\n"))
         return
 
-    add_url : (dir, url, h1)->
-        summary = path.join(dir, SUMMARY)
+    add_url : (hostpath, url, h1)->
+        summary = path.join(hostpath, DIR_MD, "!", SUMMARY)
         li = await summary_li(summary)
         txt = "* [#{h1}](#{url})"
         exist = 0
@@ -318,6 +347,12 @@ module.exports = md_dir = {
                 exist = 1
         if not exist
             li.push txt
+        await ln_fs.ln(
+            hostpath
+            path.join(DIR_MD,"!")
+            url
+            "!"
+        )
         await fs.writeFile(summary, li.join("\n"))
         return
 
@@ -375,7 +410,10 @@ module.exports = md_dir = {
                 dir.slice(-3) == ".md"
             )
                 continue
-            summary = await fs.readFile(path.join(root, dir, SUMMARY), 'utf-8')
+            lpath = path.join(root, dir)
+            if not (await fs.lstat(lpath)).isDirectory()
+                continue
+            summary = await fs.readFile(path.join(lpath, SUMMARY), 'utf-8')
             title = md_dir.md_h1(summary)
             if not title
                 title = dir
@@ -425,7 +463,7 @@ module.exports = md_dir = {
 # 3. 录入 SUMMARY.md 中不存在的目录
 # 4. 读取每个目录下的 SUMMARY.md 的名称（没有就用根目录的）
         # get: (hostpath)->
-        #     prefix = path.join(hostpath,"-/md/")
+        #     prefix = path.join(hostpath,"md/")
         #     li = []
         #     for i in (await fs.readdir(prefix))
         #         init = path.join(prefix, i, 'init.toml')

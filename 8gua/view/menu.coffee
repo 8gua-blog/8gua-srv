@@ -5,8 +5,7 @@ git = require '8gua/util/git'
 fs = require 'fs-extra'
 path = require 'path'
 
-DIR_MD = "-/md"
-DIR = "-/md/!"
+DIR_MD = "md"
 
 
 module.exports = {
@@ -16,19 +15,18 @@ module.exports = {
         show = show - 0
         li = [
             hostpath
-            DIR
+            path.join(DIR_MD, "!")
         ]
-        dir = path.join(...li)
         if show < 0
             if old.startsWith("$/")
                 url = old
             else
                 url = await move_autoname(
-                    path.join(hostpath, "-/md")
-                    "$"
+                    hostpath
+                    "-/$"
                     old
                 )
-                await md_dir.rm_url(dir, old)
+                await md_dir.rm_url(hostpath, old)
             git(hostpath).sync(path.join(DIR_MD, url))
             url = url.slice(0, -3)
         else
@@ -51,25 +49,25 @@ module.exports = {
                     raise err
                 oldpath = path.join(hostpath, DIR_MD, old)
                 if await fs.pathExists(oldpath)
-                    await md_dir.rm_url(dir, old.slice(2))
+                    await md_dir.rm_url(hostpath, old.slice(2))
                     await fs.move(oldpath, filepath)
             if await fs.pathExists(filepath)
                 if show
                     h1 = md_dir.md_h1(await fs.readFile(filepath,'utf-8'))
                     await md_dir.add_url(
-                        dir
+                        hostpath
                         mdfile
                         h1
                     )
                 else
-                    await md_dir.rm_url(dir, mdfile)
+                    await md_dir.rm_url(hostpath, mdfile)
             git(hostpath).sync(path.join(...li[1..]))
 
         reply.send [url]
 
     get: (req, reply)=>
         {hostpath} = req
-        li = await md_dir.tree(path.join(hostpath, "-/md/!"))
+        li = await md_dir.tree(path.join(hostpath, "md/!"))
         li = li.concat(await md_dir.li_md_h1(hostpath, ["$"]))
         reply.send li
 }

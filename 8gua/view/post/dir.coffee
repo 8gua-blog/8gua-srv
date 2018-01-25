@@ -1,10 +1,11 @@
 path = require 'path'
 toml_config = require "8gua/lib/toml_config"
-git = require '8gua/util/git'
+Git = require '8gua/util/git'
 fs = require 'fs-extra'
 md_dir = require("8gua/util/md_dir")
+glob_md = require('8gua/util/glob_md')
 
-DIR_MD = "-/md"
+DIR_MD = "md"
 module.exports =  {
     get:({hostpath}, reply)=>
         r = []
@@ -29,6 +30,7 @@ module.exports =  {
         raise err
         prefix = path.join(hostpath, DIR_MD)
         dirpath = path.join(prefix, dir)
+        git = Git(hostpath)
         if old
             oldpath = path.join(prefix, old)
         if old and await fs.pathExists(oldpath)
@@ -38,15 +40,45 @@ module.exports =  {
                     raise err
                 else
                     await fs.move(oldpath, dirpath, { overwrite: true })
+                    git.sync(dirpath)
+                    for i in [old, dir]
+                        await fs.remove(
+                            path.join(hostpath,"-", i)
+                        )
+                    link_dir = path.join(hostpath,"-", dir)
+                    await fs.mkdirp(link_dir)
+                    for [file] in await glob_md(dirpath)
+                        link_file = path.join(
+                                link_dir,
+                                path.basename(file)
+                            )
+                        await fs.symlink(
+                            path.relative(
+                                link_dir
+                                file
+                            ),
+                            link_file
+                        )
+                        git.sync(link_file)
+            else
+                old = ''
         else if not await fs.pathExists(dirpath)
             await fs.mkdirp(dirpath)
 
         init_toml = toml_config(path.join(dirpath,"init.toml"))
         init_toml.set("sort", sort-0)
-        md_dir.dir.set(
-            hostpath
-            dir
-            name
-        )
+        if old
+            md_dir.dir.rename(
+                hostpath
+                dir
+                name
+                old
+            )
+        else
+            md_dir.dir.set(
+                hostpath
+                dir
+                name
+            )
         reply.send({})
 }

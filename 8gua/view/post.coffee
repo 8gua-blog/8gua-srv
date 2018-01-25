@@ -29,9 +29,8 @@ to_markdown = (html)->
     html = html.replace("<br>\n","\n<br>")
     turndownService.turndown(html)
 
-DIR_MD = "-/md/"
+DIR_MD = "md/"
 DIR_LI = "$".split ' '
-DIR_LI_LEN = DIR_LI.length
 CACHE = {}
 
 
@@ -55,20 +54,25 @@ module.exports = {
                 git = true
                 old_file = file
                 file = await move_autoname(
-                    path.join(hostpath, DIR_MD), dir, old_file
+                    hostpath
+                    if dir == "$" then "-/$" else DIR_MD+dir
+                    old_file
                 )
         else
             old_file = undefined
 
+        is_draft = file.startsWith("$/")
 
         tmp = ".tmp"
         if git
             url = file.slice(0, -3)
         else
             url = ''
-            if not file.startsWith("$/")
+            if not is_draft
                 file = file+tmp
-        filepath = DIR_MD+file
+
+
+        filepath = (if is_draft then '-/' else DIR_MD)+file
         md = to_markdown(html).trim()
         h1 = h1.trim()
 
@@ -80,7 +84,12 @@ module.exports = {
             if git
                 if not file.startsWith("!/")
                     await md_dir.add(hostpath, h1, file, old_file)
-                tmppath = path.join(hostpath, filepath+tmp)
+                if old_file
+                    tmppath = path.join(DIR_MD,old_file)
+                    await md_dir.rm(hostpath, old_file)
+                else
+                    tmppath = filepath
+                tmppath = path.join(hostpath, tmppath+tmp)
                 if await fs.pathExists(tmppath)
                     await fs.remove(tmppath)
         else
@@ -101,7 +110,7 @@ module.exports = {
         for [dir, name] in (await md_dir.li(prefix))
             dir_li.push dir
             name_li.push name
-        r = r.concat(await md_dir.li_md_h1(hostpath, DIR_LI))
+        r = r.concat(await md_dir.li_md_h1(hostpath, DIR_LI, "-"))
 
         for i in dir_li
             r.push(
@@ -110,7 +119,7 @@ module.exports = {
 
 
         reply.send r
-        # file = "-/md/draft/0.md"
+        # file = "md/draft/0.md"
         # filepath = path.resolve(path.join(hostpath, file))
         # if await fs.pathExists(filepath)
         #     body = await fs.readFile(filepath, "utf-8")
