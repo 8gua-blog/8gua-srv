@@ -1,5 +1,6 @@
+ln_fs = require '8gua/util/ln_fs'
 md_dir = require("8gua/util/md_dir")
-git = require '8gua/util/git'
+Git = require '8gua/util/git'
 {trim} = require('lodash')
 {move_autoname} = require('8gua/util/fs')
 fs = require 'fs-extra'
@@ -11,6 +12,7 @@ DIR_MD = "md"
 module.exports = {
     post:(req, reply)=>
         {hostpath} = req
+        git = Git(hostpath)
         {url, show, old} = req.body
         show = show - 0
         li = [
@@ -27,7 +29,7 @@ module.exports = {
                     old
                 )
                 await md_dir.rm_url(hostpath, old)
-            git(hostpath).sync(path.join(DIR_MD, url))
+            git.sync(path.join(DIR_MD, url))
             url = url.slice(0, -3)
         else
             url = trim(url.trim().toLowerCase(),"/")
@@ -61,7 +63,13 @@ module.exports = {
                     )
                 else
                     await md_dir.rm_url(hostpath, mdfile)
-            git(hostpath).sync(path.join(...li[1..]))
+                    await ln_fs.ln(
+                        hostpath
+                        path.join(DIR_MD,"!")
+                        mdfile
+                        "!"
+                    )
+            git.sync(path.join(...li[1..]))
 
         reply.send [url]
 

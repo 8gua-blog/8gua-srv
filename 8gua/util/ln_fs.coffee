@@ -1,6 +1,7 @@
 fs = require 'fs-extra'
 path = require 'path'
 Git = require '8gua/util/git'
+_fs = require '8gua/util/fs'
 
 module.exports = {
     ln: (hostpath, dirname, file, prefix="")->
@@ -23,14 +24,5 @@ module.exports = {
 
     rm:(hostpath, file)->
         fpath = path.join(hostpath, "-", file)
-        await fs.remove fpath
-        dir = path.dirname(fpath)
-        while 1
-            if await fs.pathExists(dir)
-                files = await fs.readdir(dir)
-                if not files.length
-                    await fs.remove dir
-                    dir = path.basename(dir)
-                    continue
-            break
+        await _fs.remove(fpath)
 }

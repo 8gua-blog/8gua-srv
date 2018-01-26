@@ -1,3 +1,5 @@
+ln_fs = require '8gua/util/ln_fs'
+_fs = require '8gua/util/fs'
 md_dir = require("8gua/util/md_dir")
 Git = require '8gua/util/git'
 glob_md = require('8gua/util/glob_md')
@@ -63,15 +65,16 @@ module.exports =  {
                     )
                 )
                 await fs.mkdirp(path.dirname(tofile))
-                tmppath = filepath+TMP
                 if is_exist
                     await fs.move(filepath, tofile,  { overwrite: true })
+                tmppath = filepath+TMP
                 if await fs.pathExists(tmppath)
                     await fs.move(
                         tmppath
                         tofile+TMP
                         { overwrite: true }
                     )
+                await _fs.remove(filepath)
             if rm
                 git = Git(hostpath)
                 if file.startsWith("!/")
@@ -81,6 +84,7 @@ module.exports =  {
                     )
                 else
                     await md_dir.rm(hostpath, file)
+                    await ln_fs.rm(hostpath, file)
                 git.sync()
         reply.send {}
 }

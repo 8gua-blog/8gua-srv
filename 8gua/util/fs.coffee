@@ -3,6 +3,18 @@ fs = require 'fs-extra'
 ln_fs = require '8gua/util/ln_fs'
 
 module.exports = {
+    remove : (file) ->
+        await fs.remove(file)
+        dir = file
+        while 1
+            dir = path.dirname(dir)
+            if await fs.pathExists(dir)
+                files = await fs.readdir(dir)
+                if not files.length
+                    await fs.remove(dir)
+                    continue
+            break
+
     move_autoname:(hostpath, dir, file)->
         if file.startsWith("$/")
             base = "-"
