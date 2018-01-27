@@ -5,10 +5,10 @@ Git = require '8gua/util/git'
 _fs = require '8gua/util/fs'
 {escape} = require("lodash")
 
-BODY = "<body>"
+BODY = "</body>"
 
 seo_html = (hostpath, dirname, file, prefix="")->
-    suffix = path.join("-",prefix+file.slice(0,-3)+'.html')
+    suffix = path.join("-",prefix+file.slice(0,-3))
     [h1, html] = h1_html(await fs.readFile(path.join(hostpath, dirname, file),'utf-8'))
 
     h1 = escape(h1)
@@ -16,12 +16,15 @@ seo_html = (hostpath, dirname, file, prefix="")->
     template = (await fs.readFile(
         path.join(hostpath, "-S/seo.html"), 'utf-8'
     )).replace(
+        "%canonical",
+        "/"+suffix
+    ).replace(
         BODY
-        BODY+"""<div class="TXT"><h1>#{h1}</h1>#{html}</div>"""
+        """<div class="Pbox"><div class="C macS"><div class="TXT"><h1>#{h1}</h1>#{html}</div></div></div>"""+BODY
     ).replace("<title>", "<title>#{h1}")
 
     await fs.writeFile(
-        path.join(hostpath, suffix)
+        path.join(hostpath, suffix+'.html')
         template
     )
     return suffix
