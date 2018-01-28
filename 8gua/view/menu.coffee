@@ -55,7 +55,8 @@ module.exports = {
                     await fs.move(oldpath, filepath)
             if await fs.pathExists(filepath)
                 if show
-                    h1 = md_dir.md_h1(await fs.readFile(filepath,'utf-8'))
+                    md = await fs.readFile(filepath,'utf-8')
+                    h1 = md_dir.md_h1(md)
                     await md_dir.add_url(
                         hostpath
                         mdfile
