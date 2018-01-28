@@ -9,7 +9,7 @@ BODY = "</body>"
 
 seo_html = (hostpath, dirname, file)->
     suffix = path.join("-", file.slice(0,-3))
-    suffix_html = suffix+".html"
+    suffix_html = suffix+".htm"
     [h1, html] = h1_html(await fs.readFile(path.join(hostpath, dirname, file),'utf-8'))
 
     h1 = escape(h1)
@@ -53,7 +53,7 @@ seo_html = (hostpath, dirname, file)->
     await fs.writeFile(sitemap_xml_path, sitemap)
 
 
-    sitemap_html_path = path.join(hostpath, "-/sitemap.html")
+    sitemap_html_path = path.join(hostpath, "-/sitemap.htm")
     if await fs.pathExists(sitemap_html_path)
         sitemap_html = await fs.readFile(sitemap_html_path, "utf-8")
     else
