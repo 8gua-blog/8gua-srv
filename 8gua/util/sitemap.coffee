@@ -25,7 +25,6 @@ _sitemap_htm = (hostpath, suffix_htm, h1)->
     else
         pos = htm.indexOf('<ol>')+4
         htm = htm.slice(0, pos) + """<li>#{link}#{h1}</a></li>""" + htm.slice(pos)
-        await rss(hostpath, file, h1, html)
     await fs.writeFile(sitemap_htm_path, htm)
     return sitemap_htm
 
@@ -88,7 +87,6 @@ module.exports = (hostpath, file)->
         sitemap_xml
         await _sitemap_htm(hostpath, suffix_htm, h1)
     ]
-
     if not file.startsWith("-/!")
         file_li.push(
             await rss(hostpath, suffix_htm, h1, html, trimEnd(prefix,"/"), now)
