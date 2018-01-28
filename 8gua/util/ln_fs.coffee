@@ -29,7 +29,7 @@ seo_html = (hostpath, dirname, file)->
         template
     )
 
-    sitemap_xml = "sitemap.xml"
+    sitemap_xml = "-/sitemap.xml"
     robots = await fs.readFile(path.join(hostpath, "robots.txt"), "utf-8")
     robots = robots.slice(robots.indexOf("Sitemap:")+8)
     prefix = robots.slice(0, robots.indexOf(sitemap_xml)).trim()
@@ -53,7 +53,7 @@ seo_html = (hostpath, dirname, file)->
     await fs.writeFile(sitemap_xml_path, sitemap)
 
 
-    sitemap_html_path = path.join(hostpath, "sitemap.html")
+    sitemap_html_path = path.join(hostpath, "-/sitemap.html")
     if await fs.pathExists(sitemap_html_path)
         sitemap_html = await fs.readFile(sitemap_html_path, "utf-8")
     else

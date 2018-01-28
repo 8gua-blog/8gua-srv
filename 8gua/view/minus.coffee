@@ -40,7 +40,7 @@ HOOK = {
         origin = req.headers.origin
         {hostpath, body} = req
         url = (
-            origin.slice(0, origin.indexOf("://")+3) + body.host+"/sitemap.xml"
+            origin.slice(0, origin.indexOf("://")+3) + body.host+"/-/sitemap.xml"
         ).toLowerCase()
 
         robots_txt= "robots.txt"
