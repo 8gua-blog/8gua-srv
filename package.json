@@ -4,6 +4,7 @@
         "8gua": "src/boot/8gua"
     },
     "dependencies": {
+        "art-template": "^4.12.2",
         "auto-launch": "^5.0.3",
         "base64-url": "^2.0.1",
         "cmd-executor": "^1.1.1",
@@ -50,5 +51,5 @@
         "url": "https://github.com/8gua/8gua-cli-release.git"
     },
     "scripts": {},
-    "version": "0.0.81"
+    "version": "0.0.82"
 }
