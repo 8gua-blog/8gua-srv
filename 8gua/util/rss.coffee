@@ -59,17 +59,17 @@ module.exports = (hostpath, file, h1, html, url, now)->
         })
 
     pos = 0
-    count = 1
+    count = 0
     while 1
         pos = xml.indexOf('</entry>', pos)
         if pos < 0
             break
         else
             pos += 8
+        count += 1
         if count >= 15
             xml = xml.slice(0,pos)+"</feed>"
             break
-        count += 1
 
     id_pos = xml.indexOf(id)
     if id_pos > 0
