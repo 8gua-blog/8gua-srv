@@ -83,10 +83,19 @@ module.exports = (hostpath, file)->
     # "</urlset>"
     #"""<url><loc>http://www.example.com/foo.html</loc><lastmod>2004-12-23</lastmod></url>"""
 
-    git = Git(hostpath).sync([
+    file_li = [
         suffix_htm
         sitemap_xml
         await _sitemap_htm(hostpath, suffix_htm, h1)
-        await rss(hostpath, suffix_htm, h1, html, trimEnd(prefix,"/"), now)
-    ])
+    ]
+
+    if not file.startsWith("-/!")
+        file_li.push(
+            await rss(hostpath, suffix_htm, h1, html, trimEnd(prefix,"/"), now)
+        )
+
+    git = Git(hostpath).sync(file_li)
+
     return
+
+
