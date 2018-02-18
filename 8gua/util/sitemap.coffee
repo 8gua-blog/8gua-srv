@@ -42,6 +42,11 @@ module.exports = {
             "</li>"
         )
         await Str.remove(
+            path.join(hostpath, "-/rss.xml")
+            """<entry><id>#{file.slice(0,-4)}</id>"""
+            "</entry>"
+        )
+        await Str.remove(
             path.join(hostpath, "-/sitemap.xml")
             """<url><loc>#{await site_host(hostpath)}#{file}</loc>"""
             """</lastmod></url>\n"""
