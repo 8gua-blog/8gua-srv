@@ -24,10 +24,23 @@ module.exports = {
                 link
             )
             git.sync(suffix)
-        await sitemap(hostpath, suffix)
+        await sitemap.new(hostpath, suffix)
 
     rm:(hostpath, file)->
         fpath = path.join(hostpath, "-", file)
-        await fs.remove(fpath.slice(0,-3)+".html")
+        htm = path.join(
+            "-",
+            file.slice(0,-3)+".htm"
+        )
+        await fs.remove(
+            path.join(
+                hostpath,
+                htm
+            )
+        )
         await _fs.remove(fpath)
+        await sitemap.rm(
+            hostpath,
+            htm
+        )
 }
