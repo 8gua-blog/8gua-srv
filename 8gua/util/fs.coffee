@@ -1,6 +1,5 @@
 path = require 'path'
 fs = require 'fs-extra'
-ln_fs = require '8gua/util/ln_fs'
 
 module.exports = {
     remove : (file) ->
@@ -16,6 +15,7 @@ module.exports = {
             break
 
     move_autoname:(hostpath, dir, file)->
+        ln_fs = require './ln_fs'
         if file.startsWith("$/")
             base = "-"
         else
